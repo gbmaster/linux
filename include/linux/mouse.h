@@ -1,3 +1,6 @@
+#ifndef _LINUX_MOUSE_H
+#define _LINUX_MOUSE_H
+
 /*
  * linux/include/linux/mouse.h: header file for Logitech Bus Mouse driver
  * by James Banks
@@ -10,9 +13,6 @@
  * gt7080a@prism.gatech.edu (13JUL92)
  *
  */
-
-#ifndef _MOUSE_H
-#define _MOUSE_H
 
 #define MOUSE_IRQ		5
 

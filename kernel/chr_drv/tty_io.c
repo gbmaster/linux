@@ -1,7 +1,7 @@
 /*
  *  linux/kernel/tty_io.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -11,26 +11,20 @@
  * Kill-line thanks to John T Kohl, who also corrected VMIN = VTIME = 0.
  */
 
-#include <errno.h>
-#include <signal.h>
-
+#include <linux/types.h>
+#include <linux/errno.h>
+#include <linux/signal.h>
 #include <linux/fcntl.h>
-
-#define ALRMMASK (1<<(SIGALRM-1))
-
 #include <linux/sched.h>
 #include <linux/tty.h>
 #include <linux/ctype.h>
+
 #include <asm/io.h>
 #include <asm/segment.h>
 #include <asm/system.h>
 
 #include <sys/kd.h>
 #include "vt_kern.h"
-
-#ifndef MIN
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 #define QUEUES	(3*(NR_CONSOLES+NR_SERIALS+2*NR_PTYS))
 static struct tty_queue * tty_queues;
@@ -60,7 +54,7 @@ struct tty_struct * redirect = NULL;
  */
 struct tty_queue * table_list[] = { NULL, NULL };
 
-void put_tty_queue(char c, struct tty_queue * queue)
+void inline put_tty_queue(char c, struct tty_queue * queue)
 {
 	int head;
 	unsigned long flags;
@@ -74,7 +68,7 @@ void put_tty_queue(char c, struct tty_queue * queue)
 	__asm__ __volatile__("pushl %0 ; popfl"::"r" (flags));
 }
 
-int get_tty_queue(struct tty_queue * queue)
+int inline get_tty_queue(struct tty_queue * queue)
 {
 	int result = -1;
 	unsigned long flags;
@@ -88,7 +82,7 @@ int get_tty_queue(struct tty_queue * queue)
 	return result;
 }
 
-void tty_write_flush(struct tty_struct * tty)
+void inline tty_write_flush(struct tty_struct * tty)
 {
 	if (EMPTY(tty->write_q))
 		return;
@@ -132,6 +126,7 @@ static void sleep_if_empty(struct tty_queue * queue)
 void wait_for_keypress(void)
 {
 	sleep_if_empty(tty_table[fg_console].secondary);
+	flush_input(&tty_table[fg_console]);
 }
 
 void copy_to_cooked(struct tty_struct * tty)
@@ -177,7 +172,6 @@ void copy_to_cooked(struct tty_struct * tty)
 						put_tty_queue(8,tty->write_q);
 						put_tty_queue(' ',tty->write_q);
 						put_tty_queue(8,tty->write_q);
-						TTY_WRITE_FLUSH(tty);
 					}
 					DEC(tty->secondary->head);
 				}
@@ -199,7 +193,6 @@ void copy_to_cooked(struct tty_struct * tty)
 					put_tty_queue(8,tty->write_q);
 					put_tty_queue(32,tty->write_q);
 					put_tty_queue(8,tty->write_q);
-					TTY_WRITE_FLUSH(tty);
 				}
 				DEC(tty->secondary->head);
 				continue;
@@ -214,7 +207,6 @@ void copy_to_cooked(struct tty_struct * tty)
 			if ((START_CHAR(tty) != __DISABLED_CHAR) &&
 			    (c==START_CHAR(tty))) {
 				tty->stopped=0;
-				TTY_WRITE_FLUSH(tty);
 				continue;
 			}
 		}
@@ -241,7 +233,7 @@ void copy_to_cooked(struct tty_struct * tty)
 		if (c==10 || (EOF_CHAR(tty) != __DISABLED_CHAR &&
 		    c==EOF_CHAR(tty)))
 			tty->secondary->data++;
-		if ((L_ECHO(tty) || (L_CANON(tty) && L_ECHONL(tty))) && (c==10)) {
+		if ((c==10) && (L_ECHO(tty) || (L_CANON(tty) && L_ECHONL(tty)))) {
 			put_tty_queue(10,tty->write_q);
 			put_tty_queue(13,tty->write_q);
 		} else if (L_ECHO(tty)) {
@@ -252,12 +244,11 @@ void copy_to_cooked(struct tty_struct * tty)
 				put_tty_queue(c,tty->write_q);
 		}
 		put_tty_queue(c,tty->secondary);
-		TTY_WRITE_FLUSH(tty);
 	}
 	TTY_WRITE_FLUSH(tty);
 	if (!EMPTY(tty->secondary))
 		wake_up(&tty->secondary->proc_list);
-	if (LEFT(tty->write_q) > TTY_BUF_SIZE/2)
+	if (tty->write_q->proc_list && LEFT(tty->write_q) > TTY_BUF_SIZE/2)
 		wake_up(&tty->write_q->proc_list);
 }
 

@@ -1,7 +1,5 @@
-#ifndef _SYS_TYPES_H
-#define _SYS_TYPES_H
-
-#include <stddef.h>
+#ifndef _LINUX_TYPES_H
+#define _LINUX_TYPES_H
 
 #ifndef _SIZE_T
 #define _SIZE_T

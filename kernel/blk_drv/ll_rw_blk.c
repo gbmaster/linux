@@ -1,16 +1,17 @@
 /*
  *  linux/kernel/blk_dev/ll_rw.c
  *
- * (C) 1991 Linus Torvalds
+ * Copyright (C) 1991, 1992 Linus Torvalds
  */
 
 /*
  * This handles all read/write requests to block devices
  */
-#include <errno.h>
-#include <linux/string.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
+#include <linux/errno.h>
+#include <linux/string.h>
+
 #include <asm/system.h>
 
 #include "blk.h"
@@ -136,6 +137,7 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 
 static void make_request(int major,int rw, struct buffer_head * bh)
 {
+	unsigned int sector, count;
 	struct request * req;
 	int rw_ahead;
 
@@ -153,8 +155,10 @@ static void make_request(int major,int rw, struct buffer_head * bh)
 		printk("Bad block dev command, must be R/W/RA/WA\n");
 		return;
 	}
+	count = bh->b_size >> 9;
+	sector = bh->b_blocknr * count;
 	if (blk_size[major])
-		if (blk_size[major][MINOR(bh->b_dev)] <= bh->b_blocknr) {
+		if (blk_size[major][MINOR(bh->b_dev)] < (sector + count)>>1) {
 			bh->b_dirt = bh->b_uptodate = 0;
 			return;
 		}
@@ -165,16 +169,16 @@ static void make_request(int major,int rw, struct buffer_head * bh)
 	}
 repeat:
 	cli();
-	if (major == 3 && (req = blk_dev[major].current_request)) {
+	if ((major == 3 ||  major == 8 )&& (req = blk_dev[major].current_request)) {
 		while (req = req->next) {
 			if (req->dev == bh->b_dev &&
 			    !req->waiting &&
 			    req->cmd == rw &&
-			    req->sector + req->nr_sectors == bh->b_blocknr << 1 &&
+			    req->sector + req->nr_sectors == sector &&
 			    req->nr_sectors < 254) {
 				req->bhtail->b_reqnext = bh;
 				req->bhtail = bh;
-				req->nr_sectors += 2;
+				req->nr_sectors += count;
 				bh->b_dirt = 0;
 				sti();
 				return;
@@ -208,8 +212,9 @@ found:	sti();
 	req->dev = bh->b_dev;
 	req->cmd = rw;
 	req->errors = 0;
-	req->sector = bh->b_blocknr<<1;
-	req->nr_sectors = 2;
+	req->sector = sector;
+	req->nr_sectors = count;
+	req->current_nr_sectors = count;
 	req->buffer = bh->b_data;
 	req->waiting = NULL;
 	req->bh = bh;
@@ -224,7 +229,7 @@ void ll_rw_page(int rw, int dev, int page, char * buffer)
 	unsigned int major = MAJOR(dev);
 
 	if (major >= NR_BLK_DEV || !(blk_dev[major].request_fn)) {
-		printk("Trying to read nonexistent block-device\n\r");
+		printk("Trying to read nonexistent block-device %04x (%d)\n",dev,page*8);
 		return;
 	}
 	if (rw!=READ && rw!=WRITE)
@@ -250,6 +255,7 @@ repeat:
 	req->errors = 0;
 	req->sector = page<<3;
 	req->nr_sectors = 8;
+	req->current_nr_sectors = 8;
 	req->buffer = buffer;
 	req->waiting = &current->wait;
 	req->bh = NULL;
@@ -265,9 +271,14 @@ void ll_rw_block(int rw, struct buffer_head * bh)
 
 	if (!bh)
 		return;
+	if (bh->b_size != 1024) {
+		printk("ll_rw_block: only 1024-char blocks implemented (%d)\n",bh->b_size);
+		bh->b_dirt = bh->b_uptodate = 0;
+		return;
+	}
 	if ((major=MAJOR(bh->b_dev)) >= NR_BLK_DEV ||
 	!(blk_dev[major].request_fn)) {
-		printk("ll_rw_block: Trying to read nonexistent block-device\n\r");
+		printk("ll_rw_block: Trying to read nonexistent block-device %04x (%d)\n",bh->b_dev,bh->b_blocknr);
 		bh->b_dirt = bh->b_uptodate = 0;
 		return;
 	}
@@ -331,6 +342,7 @@ repeat:
 		req->errors = 0;
 		req->sector = b[i] << 1;
 		req->nr_sectors = 2;
+		req->current_nr_sectors = 2;
 		req->buffer = buf;
 		req->waiting = &current->wait;
 		req->bh = NULL;

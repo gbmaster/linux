@@ -20,17 +20,17 @@
 #include	<linux/sched.h>
 #include	<linux/mouse.h>
 #include	<linux/tty.h>
+#include	<linux/signal.h>
+#include	<linux/errno.h>
+
 #include	<asm/io.h>
 #include	<asm/segment.h>
 #include	<asm/system.h>
 #include	<asm/irq.h>
-#include	<signal.h>
-#include	<errno.h>
-#include	<signal.h>
 
 static struct mouse_status mouse;
 
-static void mouse_interrupt(int cpl)
+static void mouse_interrupt(int unused)
 {
 	char dx, dy, buttons;
 
@@ -77,8 +77,6 @@ static int open_mouse(struct inode * inode, struct file * file)
 		return -EBUSY;
 	if (!mouse.present)
 		return -EINVAL;
-	if (request_irq(MOUSE_IRQ, mouse_interrupt))
-		return -EBUSY;
 	mouse.active = 1;
 	mouse.ready = 0;
 	mouse.inode = inode;
@@ -86,6 +84,13 @@ static int open_mouse(struct inode * inode, struct file * file)
 	mouse.dy = 0;	
 	mouse.buttons = mouse.latch_buttons = 0x80;
 	MSE_INT_ON();	
+	if (request_irq(MOUSE_IRQ, mouse_interrupt)) {
+		MSE_INT_OFF();
+		mouse.active = 0;
+		mouse.ready = 0;
+		mouse.inode = NULL;
+		return -EBUSY;
+	}
 	return 0;
 }
 

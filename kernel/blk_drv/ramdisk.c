@@ -4,9 +4,10 @@
  *  Written by Theodore Ts'o, 12/2/91
  */
 
-#include <linux/string.h>
 
 #include <linux/config.h>
+#ifdef RAMDISK
+#include <linux/string.h>
 #include <linux/sched.h>
 #include <linux/minix_fs.h>
 #include <linux/fs.h>
@@ -21,11 +22,12 @@
 char	*rd_start;
 int	rd_length = 0;
 
-void do_rd_request(void)
+static void do_rd_request(void)
 {
 	int	len;
 	char	*addr;
 
+repeat:
 	INIT_REQUEST;
 	addr = rd_start + (CURRENT->sector << 9);
 	len = CURRENT->nr_sectors << 9;
@@ -119,7 +121,7 @@ void rd_load(void)
 		if (nblocks > 2) 
 			bh = breada(ROOT_DEV, block, block+1, block+2, -1);
 		else
-			bh = bread(ROOT_DEV, block);
+			bh = bread(ROOT_DEV, block, BLOCK_SIZE);
 		if (!bh) {
 			printk("I/O error on block %d, aborting load\n", 
 				block);
@@ -136,3 +138,4 @@ void rd_load(void)
 	printk("\ndone\n");
 	ROOT_DEV=0x0101;
 }
+#endif

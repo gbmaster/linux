@@ -1,18 +1,18 @@
 /*
  *  linux/fs/namei.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
  * Some corrections by tytso.
  */
 
-#include <errno.h>
 #include <const.h>
 
 #include <asm/segment.h>
 
+#include <linux/errno.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <linux/string.h>

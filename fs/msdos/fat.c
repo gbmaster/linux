@@ -4,14 +4,12 @@
  *  Written 1992 by Werner Almesberger
  */
 
-#include <errno.h>
-#include <linux/stat.h>
 #include <linux/msdos_fs.h>
 #include <linux/kernel.h>
-
+#include <linux/errno.h>
+#include <linux/stat.h>
 
 static struct fat_cache *fat_cache,cache[FAT_CACHE];
-
 
 /* Returns the this'th FAT entry, -1 if it is an end-of-file entry. If
    new_value is != -1, that FAT entry is replaced by it. */

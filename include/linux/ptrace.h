@@ -1,8 +1,8 @@
+#ifndef _LINUX_PTRACE_H
+#define _LINUX_PTRACE_H
 /* ptrace.h */
 /* structs and defines to help the user use the ptrace system call. */
 
-#ifndef _SYS_PTRACE_H
-#define _SYS_PTRACE_H
 /* has the defines to get at the registers. */
 
 #define PTRACE_TRACEME		   0
@@ -64,4 +64,4 @@ struct pt_regs {
   long ss;
 };
 
-#endif /* _SYS_PTRACE_H */
+#endif

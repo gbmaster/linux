@@ -1,9 +1,9 @@
+#ifndef _LINUX_RESOURCE_H
+#define _LINUX_RESOURCE_H
+
 /*
  * Resource control/accounting header file for linux
  */
-
-#ifndef _SYS_RESOURCE_H
-#define _SYS_RESOURCE_H
 
 /*
  * Definition of struct rusage taken from BSD 4.3 Reno
@@ -67,4 +67,4 @@ struct rlimit {
 #define	PRIO_PGRP	1
 #define	PRIO_USER	2
 
-#endif /* _SYS_RESOURCE_H */
+#endif

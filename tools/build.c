@@ -1,7 +1,7 @@
 /*
  *  linux/tools/build.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -25,7 +25,7 @@
 #include <stdlib.h>	/* contains exit */
 #include <sys/types.h>	/* unistd.h needs this */
 #include <sys/stat.h>
-#include <linux/fs.h>
+#include <sys/sysmacros.h>
 #include <unistd.h>	/* contains read/write */
 #include <fcntl.h>
 
@@ -69,8 +69,8 @@ int main(int argc, char ** argv)
 				perror(argv[4]);
 				die("Couldn't stat root device.");
 			}
-			major_root = MAJOR(sb.st_rdev);
-			minor_root = MINOR(sb.st_rdev);
+			major_root = major(sb.st_rdev);
+			minor_root = minor(sb.st_rdev);
 		} else {
 			major_root = 0;
 			minor_root = 0;

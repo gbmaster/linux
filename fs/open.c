@@ -1,20 +1,19 @@
 /*
  *  linux/fs/open.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#include <errno.h>
-#include <sys/types.h>
-#include <utime.h>
-
-#include <sys/vfs.h>
-
+#include <linux/vfs.h>
+#include <linux/types.h>
+#include <linux/utime.h>
+#include <linux/errno.h>
 #include <linux/fcntl.h>
 #include <linux/stat.h>
 #include <linux/string.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
+#include <linux/signal.h>
 
 #include <asm/segment.h>
 
@@ -307,20 +306,17 @@ int sys_open(const char * filename,int flag,int mode)
 	if (fd>=NR_OPEN)
 		return -EMFILE;
 	current->close_on_exec &= ~(1<<fd);
-	f=0+file_table;
-	for (i=0 ; i<NR_FILE ; i++,f++)
-		if (!f->f_count) break;
-	if (i>=NR_FILE)
+	f = get_empty_filp();
+	if (!f)
 		return -ENFILE;
-	(current->filp[fd] = f)->f_count++;
+	current->filp[fd] = f;
 	if ((i = open_namei(filename,flag,mode,&inode))<0) {
 		current->filp[fd]=NULL;
-		f->f_count=0;
+		f->f_count--;
 		return i;
 	}
 	f->f_mode = "\001\002\003\000"[flag & O_ACCMODE];
 	f->f_flags = flag;
-	f->f_count = 1;
 	f->f_inode = inode;
 	f->f_pos = 0;
 	f->f_reada = 0;
@@ -330,7 +326,7 @@ int sys_open(const char * filename,int flag,int mode)
 	if (f->f_op && f->f_op->open)
 		if (i = f->f_op->open(inode,f)) {
 			iput(inode);
-			f->f_count=0;
+			f->f_count--;
 			current->filp[fd]=NULL;
 			return i;
 		}
@@ -365,6 +361,12 @@ int sys_close(unsigned int fd)
 	if (filp->f_op && filp->f_op->release)
 		filp->f_op->release(inode,filp);
 	filp->f_count--;
+	filp->f_inode = NULL;
 	iput(inode);
 	return 0;
+}
+
+int sys_vhangup(void)
+{
+	return -ENOSYS;
 }

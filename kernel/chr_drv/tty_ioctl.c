@@ -1,16 +1,16 @@
 /*
  *  linux/kernel/chr_drv/tty_ioctl.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#include <errno.h>
-#include <termios.h>
-#include <sys/types.h>
-
+#include <linux/types.h>
+#include <linux/termios.h>
+#include <linux/errno.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <linux/tty.h>
+#include <linux/fcntl.h>
 
 #include <asm/io.h>
 #include <asm/segment.h>
@@ -391,6 +391,23 @@ int tty_ioctl(struct inode * inode, struct file * file,
 			if (!IS_A_SERIAL(dev))
 				return -EINVAL;
 			return set_serial_info(dev-64,(struct serial_struct *) arg);
+		case FIONBIO:
+			if (arg)
+				file->f_flags |= O_NONBLOCK;
+			else
+				file->f_flags &= ~O_NONBLOCK;
+			return 0;
+		case TIOCNOTTY:
+			if (MINOR(file->f_rdev) != current->tty)
+				return -EINVAL;
+			current->tty = -1;
+			if (current->leader) {
+				if (tty->pgrp > 0)
+					kill_pg(tty->pgrp, SIGHUP, 0);
+				tty->pgrp = -1;
+				tty->session = 0;
+			}
+			return 0;
 		default:
 			return vt_ioctl(tty, dev, cmd, arg);
 	}

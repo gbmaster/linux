@@ -1,7 +1,5 @@
-#ifndef _TIMES_H
-#define _TIMES_H
-
-#include <sys/types.h>
+#ifndef _LINUX_TIMES_H
+#define _LINUX_TIMES_H
 
 struct tms {
 	time_t tms_utime;
@@ -9,7 +7,5 @@ struct tms {
 	time_t tms_cutime;
 	time_t tms_cstime;
 };
-
-extern time_t times(struct tms * tp);
 
 #endif

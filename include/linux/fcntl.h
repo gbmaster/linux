@@ -1,8 +1,6 @@
 #ifndef _FCNTL_H
 #define _FCNTL_H
 
-#include <sys/types.h>
-
 /* open/fcntl - O_SYNC isn't implemented yet */
 #define O_ACCMODE	  0003
 #define O_RDONLY	    00

@@ -1,18 +1,17 @@
 /*
  *  linux/fs/pipe.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
-
-#include <signal.h>
-#include <errno.h>
-#include <termios.h>
 
 #include <asm/segment.h>
 
-#include <linux/fcntl.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
+#include <linux/errno.h>
+#include <linux/signal.h>
+#include <linux/fcntl.h>
+#include <linux/termios.h>
 
 static int pipe_read(struct inode * inode, struct file * filp, char * buf, int count)
 {
@@ -208,14 +207,13 @@ int sys_pipe(unsigned long * fildes)
 	int i,j;
 
 	verify_area(fildes,8);
-	j=0;
-	for(i=0;j<2 && i<NR_FILE;i++)
-		if (!file_table[i].f_count)
-			(f[j++]=i+file_table)->f_count++;
+	for(j=0 ; j<2 ; j++)
+		if (!(f[j] = get_empty_filp()))
+			break;
 	if (j==1)
-		f[0]->f_count=0;
+		f[0]->f_count--;
 	if (j<2)
-		return -1;
+		return -ENFILE;
 	j=0;
 	for(i=0;j<2 && i<NR_OPEN;i++)
 		if (!current->filp[i]) {
@@ -225,14 +223,16 @@ int sys_pipe(unsigned long * fildes)
 	if (j==1)
 		current->filp[fd[0]]=NULL;
 	if (j<2) {
-		f[0]->f_count=f[1]->f_count=0;
-		return -1;
+		f[0]->f_count--;
+		f[1]->f_count--;
+		return -EMFILE;
 	}
 	if (!(inode=get_pipe_inode())) {
-		current->filp[fd[0]] =
-			current->filp[fd[1]] = NULL;
-		f[0]->f_count = f[1]->f_count = 0;
-		return -1;
+		current->filp[fd[0]] = NULL;
+		current->filp[fd[1]] = NULL;
+		f[0]->f_count--;
+		f[1]->f_count--;
+		return -ENFILE;
 	}
 	f[0]->f_inode = f[1]->f_inode = inode;
 	f[0]->f_pos = f[1]->f_pos = 0;

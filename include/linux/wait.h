@@ -3,6 +3,9 @@
 
 #include <linux/limits.h>
 
+#define WNOHANG		1
+#define WUNTRACED	2
+
 struct wait_queue {
 	struct task_struct * task;
 	struct wait_queue * next;

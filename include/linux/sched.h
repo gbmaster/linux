@@ -1,5 +1,5 @@
-#ifndef _SCHED_H
-#define _SCHED_H
+#ifndef _LINUX_SCHED_H
+#define _LINUX_SCHED_H
 
 #define HZ 100
 
@@ -39,10 +39,10 @@
 #include <linux/head.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
-#include <sys/param.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <signal.h>
+#include <linux/signal.h>
+#include <linux/time.h>
+#include <linux/param.h>
+#include <linux/resource.h>
 
 #if (NR_OPEN > 32)
 #error "Currently the close-on-exec-flags and select masks are in one long, max 32 files/proc"
@@ -117,7 +117,8 @@ struct task_struct {
 	long blocked;	/* bitmap of masked signals */
 /* various fields */
 	int exit_code;
-	int dumpable;
+	int dumpable:1;
+	int swappable:1;
 	unsigned long start_code,end_code,end_data,brk,start_stack;
 	long pid,pgrp,session,leader;
 	int	groups[NGROUPS];
@@ -183,7 +184,7 @@ struct task_struct {
 #define INIT_TASK \
 /* state etc */	{ 0,15,15, \
 /* signals */	0,{{},},0, \
-/* ec,brk... */	0,0,0,0,0,0,0, \
+/* ec,brk... */	0,0,0,0,0,0,0,0, \
 /* pid etc.. */	0,0,0,0, \
 /* suppl grps*/ {NOGROUP,}, \
 /* proc links*/ &init_task.task,&init_task.task,NULL,NULL,NULL, \

@@ -1,7 +1,7 @@
 /*
  *  linux/kernel/sched.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -13,18 +13,19 @@
 
 #define TIMER_IRQ 0
 
+#include <linux/signal.h>
 #include <linux/sched.h>
 #include <linux/timer.h>
 #include <linux/kernel.h>
 #include <linux/sys.h>
 #include <linux/fdreg.h>
+#include <linux/errno.h>
+#include <linux/time.h>
+#include <linux/ptrace.h>
+
 #include <asm/system.h>
 #include <asm/io.h>
 #include <asm/segment.h>
-#include <sys/time.h>
-
-#include <signal.h>
-#include <errno.h>
 
 int need_resched = 0;
 
@@ -381,7 +382,13 @@ void update_avg(void)
 unsigned long timer_active = 0;
 struct timer_struct timer_table[32];
 
-static void do_timer(int cpl)
+/*
+ * The int argument is really a (struct pt_regs *), in case the
+ * interrupt wants to know from where it was called. The timer
+ * irq uses this to decide if it should update the user or system
+ * times.
+ */
+static void do_timer(int regs)
 {
 	unsigned long mask;
 	struct timer_struct *tp = timer_table+0;
@@ -389,10 +396,16 @@ static void do_timer(int cpl)
 	static int avg_cnt = 0;
 
 	jiffies++;
-	if (!cpl)
-		current->stime++;
-	else
+	if (3 & ((struct pt_regs *) regs)->cs)
 		current->utime++;
+	else {
+		current->stime++;
+		/* Update ITIMER_VIRT for current task if not in a system call */
+		if (current->it_virt_value && !(--current->it_virt_value)) {
+			current->it_virt_value = current->it_virt_incr;
+			send_sig(SIGVTALRM,current,1);
+		}
+	}
 	if (--avg_cnt < 0) {
 		avg_cnt = 500;
 		update_avg();
@@ -413,11 +426,6 @@ static void do_timer(int cpl)
 	if (current->it_prof_value && !(--current->it_prof_value)) {
 		current->it_prof_value = current->it_prof_incr;
 		send_sig(SIGPROF,current,1);
-	}
-	/* Update ITIMER_VIRT for current task if not in a system call */
-	if (current->it_virt_value && !(--current->it_virt_value)) {
-		current->it_virt_value = current->it_virt_incr;
-		send_sig(SIGVTALRM,current,1);
 	}
 	for (mask = 1 ; mask ; tp++,mask += mask) {
 		if (mask > timer_active)

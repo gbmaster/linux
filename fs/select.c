@@ -5,21 +5,20 @@
  * patches by Peter MacDonald. Heavily edited by Linus.
  */
 
+#include <linux/types.h>
+#include <linux/time.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/string.h>
 #include <linux/stat.h>
+#include <linux/signal.h>
+#include <linux/errno.h>
 
 #include <asm/segment.h>
 #include <asm/system.h>
 
-#include <sys/types.h>
-#include <sys/time.h>
-
 #include <const.h>
-#include <errno.h>
-#include <signal.h>
 
 /*
  * Ok, Peter made a complicated, but straightforward multiple_wait() function.
@@ -32,8 +31,6 @@
  * select_wait() is a inline-function defined in <linux/fs.h>, as all select
  * functions have to call it to add an entry to the select table.
  */
-
-static select_table * sel_tables = NULL;
 
 static void free_wait(select_table * p)
 {
@@ -134,9 +131,9 @@ repeat:
 }
 
 /*
- * Note that we cannot return -ERESTARTSYS, as we change our input
- * parameters. Sad, but there you are. We could do some tweaking in
- * the library function ...
+ * We can actually return ERESTARTSYS insetad of EINTR, but I'd
+ * like to be certain this leads to no problems. So I return
+ * EINTR just for safety.
  */
 int sys_select( unsigned long *buffer )
 {
@@ -178,8 +175,17 @@ int sys_select( unsigned long *buffer )
 	else
 		timeout = 0;
 	current->timeout = 0;
+	if (tvp) {
+		verify_area(tvp, sizeof(*tvp));
+		put_fs_long(timeout/HZ, (unsigned long *) &tvp->tv_sec);
+		timeout %= HZ;
+		timeout *= (1000000/HZ);
+		put_fs_long(timeout, (unsigned long *) &tvp->tv_usec);
+	}
 	if (i < 0)
 		return i;
+	if (!i && (current->signal & ~current->blocked))
+		return -EINTR;
 	if (inp) {
 		verify_area(inp, 4);
 		put_fs_long(res_in,inp);
@@ -192,16 +198,5 @@ int sys_select( unsigned long *buffer )
 		verify_area(exp,4);
 		put_fs_long(res_ex,exp);
 	}
-	if (tvp) {
-		verify_area(tvp, sizeof(*tvp));
-		put_fs_long(timeout/HZ, (unsigned long *) &tvp->tv_sec);
-		timeout %= HZ;
-		timeout *= (1000000/HZ);
-		put_fs_long(timeout, (unsigned long *) &tvp->tv_usec);
-	}
-	if (i)
-		return i;
-	if (current->signal & ~current->blocked)
-		return -EINTR;
-	return 0;
+	return i;
 }

@@ -4,19 +4,17 @@
  *  Written 1992 by Werner Almesberger
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <linux/string.h>
-#include <linux/stat.h>
 #include <linux/msdos_fs.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
-
+#include <linux/errno.h>
+#include <linux/string.h>
+#include <linux/stat.h>
 
 static char bin_extensions[] =
   "EXECOMAPPSYSOVLOBJLIB"		/* program code */
-  "ARCZIPLHALZHZOOTARZ  ARJ"		/* common archivers */
-  "GIFBMPTIFGL JPG"			/* graphics */
+  "ARCZIPLHALZHZOOTARZ  ARJTZ "		/* common archivers */
+  "GIFBMPTIFGL JPGPCX"			/* graphics */
   "TFMVF GF PK PXLDVI";			/* TeX */
 
 
@@ -100,7 +98,7 @@ printk("set to %x\r\n",fat_access(inode->i_sb,this,-1));
 	else {
 		last = 0;
 		if (current = inode->i_data[D_START]) {
-			cache_lookup(inode,INT_MAX,&last,&current);
+			cache_lookup(inode,0x7fffffff,&last,&current);
 			while (current && current != -1)
 				if (!(current = fat_access(inode->i_sb,
 				    last = current,-1)))
@@ -127,7 +125,7 @@ printk("zeroing sector %d\r\n",sector);
 #endif
 		if (current < MSDOS_SB(inode->i_sb)->cluster_size-1 &&
 		    !(sector & 1)) {
-			if (!(bh = getblk(inode->i_dev,sector >> 1)))
+			if (!(bh = getblk(inode->i_dev,sector >> 1, BLOCK_SIZE)))
 				printk("getblk failed\r\n");
 			else {
 				memset(bh->b_data,0,BLOCK_SIZE);
@@ -171,7 +169,7 @@ int date_dos2unix(unsigned short time,unsigned short date)
 {
 	int month,year;
 
-	month = ((date >> 5) & 4)-1;
+	month = ((date >> 5) & 15)-1;
 	year = date >> 9;
 	return (time & 31)*2+60*((time >> 5) & 63)+(time >> 11)*3600+86400*
 	    ((date & 31)-1+day_n[month]+(year/4)+year*365-((year & 3) == 0 &&
@@ -220,10 +218,13 @@ int msdos_get_entry(struct inode *dir,int *pos,struct buffer_head **bh,
 		offset = *pos;
 		if ((sector = msdos_smap(dir,*pos >> SECTOR_BITS)) == -1)
 			return -1;
-		if (!sector) return -1; /* FAT error ... */
+		if (!sector)
+			return -1; /* FAT error ... */
 		*pos += sizeof(struct msdos_dir_entry);
-		if (*bh) brelse(*bh);
-		if (!(*bh = msdos_sread(dir->i_dev,sector,&data))) continue;
+		if (*bh)
+			brelse(*bh);
+		if (!(*bh = msdos_sread(dir->i_dev,sector,&data)))
+			continue;
 		*de = (struct msdos_dir_entry *) (data+(offset &
 		    (SECTOR_SIZE-1)));
 		return (sector << MSDOS_DPS_BITS)+((offset & (SECTOR_SIZE-1)) >>

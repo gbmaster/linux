@@ -1,8 +1,5 @@
-#ifndef _SYS_DIRENT_H
-#define _SYS_DIRENT_H
-
-#include <limits.h>
-#include <sys/types.h>
+#ifndef _LINUX_DIRENT_H
+#define _LINUX_DIRENT_H
 
 struct dirent {
 	long		d_ino;
