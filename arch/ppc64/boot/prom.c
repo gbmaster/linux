@@ -27,24 +27,6 @@ void chrpboot(int a1, int a2, void *prom);	/* in main.c */
 
 void printk(char *fmt, ...);
 
-void
-start(int a1, int a2, void *promptr)
-{
-	prom = (int (*)(void *)) promptr;
-	chosen_handle = finddevice("/chosen");
-	if (chosen_handle == (void *) -1)
-		exit();
-	if (getprop(chosen_handle, "stdout", &stdout, sizeof(stdout)) != 4)
-		exit();
-	stderr = stdout;
-	if (getprop(chosen_handle, "stdin", &stdin, sizeof(stdin)) != 4)
-	exit();
-
-	chrpboot(a1, a2, promptr);
-	for (;;)
-		exit();
-}
-
 int
 write(void *handle, void *ptr, int nb)
 {
