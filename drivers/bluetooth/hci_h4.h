@@ -23,46 +23,21 @@
 */
 
 /*
- * $Id: hci_usb.h,v 1.3 2001/06/02 01:40:08 maxk Exp $
+ * $Id: hci_h4.h,v 1.1.1.1 2002/03/08 21:03:15 maxk Exp $
  */
 
 #ifdef __KERNEL__
-
-/* Class, SubClass, and Protocol codes that describe a Bluetooth device */
-#define HCI_DEV_CLASS        0xe0	/* Wireless class */
-#define HCI_DEV_SUBCLASS     0x01	/* RF subclass */
-#define HCI_DEV_PROTOCOL     0x01	/* Bluetooth programming protocol */
-
-#define HCI_CTRL_REQ	     0x20
-
-struct hci_usb {
-	struct usb_device 	*udev;
-
-	devrequest		dev_req;
-	struct urb 		*ctrl_urb;
-	struct urb		*intr_urb;
-	struct urb		*read_urb;
-	struct urb		*write_urb;
-
-	__u8			*read_buf;
-	__u8			*intr_buf;
-	struct sk_buff		*intr_skb;
-	int			intr_count;
-
-	__u8			bulk_out_ep_addr;
-	__u8			bulk_in_ep_addr;
-	__u8			intr_in_ep_addr;
-	__u8			intr_in_interval;
-
-	struct hci_dev		hdev;
-
-	unsigned long		tx_state;
-	struct sk_buff_head	tx_ctrl_q;
-	struct sk_buff_head	tx_write_q;
+struct h4_struct {
+	unsigned long rx_state;
+	unsigned long rx_count;
+	struct sk_buff *rx_skb;
 };
 
-/* Transmit states  */
-#define HCI_TX_CTRL	1
-#define HCI_TX_WRITE	2
+/* H4 receiver States */
+#define H4_W4_PACKET_TYPE 0
+#define H4_W4_EVENT_HDR	  1
+#define H4_W4_ACL_HDR     2
+#define H4_W4_SCO_HDR     3
+#define H4_W4_DATA        4
 
 #endif /* __KERNEL__ */
