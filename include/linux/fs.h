@@ -1,17 +1,16 @@
+#ifndef _LINUX_FS_H
+#define _LINUX_FS_H
+
 /*
  * This file has definitions for some important file table
  * structures etc.
  */
 
-#ifndef _FS_H
-#define _FS_H
-
 #include <linux/limits.h>
 #include <linux/wait.h>
-
-#include <sys/types.h>
-#include <sys/dirent.h>
-#include <sys/vfs.h>
+#include <linux/types.h>
+#include <linux/dirent.h>
+#include <linux/vfs.h>
 
 /* devices are as follows: (same as minix, so we can use the minix
  * file system. These are major numbers.)
@@ -39,7 +38,7 @@
 #define READA 2		/* read-ahead - don't pause */
 #define WRITEA 3	/* "write-ahead" - silly, but somewhat useful */
 
-void buffer_init(long buffer_end);
+extern void buffer_init(void);
 
 #define MAJOR(a) (((unsigned)(a))>>8)
 #define MINOR(a) ((a)&0xff)
@@ -96,18 +95,20 @@ typedef char buffer_block[BLOCK_SIZE];
 
 struct buffer_head {
 	char * b_data;			/* pointer to data block (1024 bytes) */
+	unsigned long b_size;		/* block size */
 	unsigned long b_blocknr;	/* block number */
 	unsigned short b_dev;		/* device (0 = free) */
+	unsigned short b_count;		/* users using this block */
 	unsigned char b_uptodate;
 	unsigned char b_dirt;		/* 0-clean,1-dirty */
-	unsigned char b_count;		/* users using this block */
 	unsigned char b_lock;		/* 0 - ok, 1 -locked */
 	struct wait_queue * b_wait;
-	struct buffer_head * b_prev;
+	struct buffer_head * b_prev;		/* doubly linked list of hash-queue */
 	struct buffer_head * b_next;
-	struct buffer_head * b_prev_free;
+	struct buffer_head * b_prev_free;	/* doubly linked list of buffers */
 	struct buffer_head * b_next_free;
-	struct buffer_head * b_reqnext;
+	struct buffer_head * b_this_page;	/* circular list of buffers in one page */
+	struct buffer_head * b_reqnext;		/* request queue */
 };
 
 struct inode {
@@ -148,29 +149,28 @@ struct file {
 	off_t f_pos;
 };
 
+#include <linux/minix_fs_sb.h>
+#include <linux/ext_fs_sb.h>
+#include <linux/msdos_fs_sb.h>
+
 struct super_block {
-	unsigned long s_ninodes;
-	unsigned long s_nzones;
-	unsigned long s_imap_blocks;
-	unsigned long s_zmap_blocks;
-	unsigned long s_firstdatazone;
-	unsigned long s_log_zone_size;
-	unsigned long s_max_size;
-	unsigned short s_magic;
-/* These are only in memory */
-	struct buffer_head * s_imap[8];
-	struct buffer_head * s_zmap[8];
 	unsigned short s_dev;
-	struct inode * s_covered;
-	struct inode * s_mounted;
-	unsigned long s_time;
-	struct wait_queue * s_wait;
+	unsigned long s_blocksize;
 	unsigned char s_lock;
 	unsigned char s_rd_only;
 	unsigned char s_dirt;
-	/* TUBE */
 	struct super_operations *s_op;
-	int s_flags;
+	unsigned long s_flags;
+	unsigned long s_magic;
+	unsigned long s_time;
+	struct inode * s_covered;
+	struct inode * s_mounted;
+	struct wait_queue * s_wait;
+	union {
+		struct minix_sb_info minix_sb;
+		struct ext_sb_info ext_sb;
+		struct msdos_sb_info msdos_sb;
+	} u;
 };
 
 struct file_operations {
@@ -223,8 +223,12 @@ extern struct file_system_type *get_fs_type(char *name);
 extern struct inode inode_table[NR_INODE];
 extern struct file file_table[NR_FILE];
 extern struct super_block super_block[NR_SUPER];
-extern struct buffer_head * start_buffer;
+
+extern void grow_buffers(int size);
+extern int shrink_buffers(void);
+
 extern int nr_buffers;
+extern int nr_buffer_heads;
 
 extern void check_disk_change(int dev);
 extern void invalidate_inodes(int dev);
@@ -247,13 +251,14 @@ extern void iput(struct inode * inode);
 extern struct inode * iget(int dev,int nr);
 extern struct inode * get_empty_inode(void);
 extern struct inode * get_pipe_inode(void);
-extern struct buffer_head * get_hash_table(int dev, int block);
-extern struct buffer_head * getblk(int dev, int block);
+extern struct file * get_empty_filp(void);
+extern struct buffer_head * get_hash_table(int dev, int block, int size);
+extern struct buffer_head * getblk(int dev, int block, int size);
 extern void ll_rw_block(int rw, struct buffer_head * bh);
 extern void ll_rw_page(int rw, int dev, int nr, char * buffer);
 extern void ll_rw_swap_file(int rw, int dev, unsigned int *b, int nb, char *buffer);
 extern void brelse(struct buffer_head * buf);
-extern struct buffer_head * bread(int dev,int block);
+extern struct buffer_head * bread(int dev, int block, int size);
 extern void bread_page(unsigned long addr,int dev,int b[4]);
 extern struct buffer_head * breada(int dev,int block,...);
 extern int sync_dev(int dev);

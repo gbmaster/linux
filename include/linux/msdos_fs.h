@@ -1,14 +1,13 @@
+#ifndef _MSDOS_FS_H
+#define _MSDOS_FS_H
+
 /*
  * The MS-DOS filesystem constants/structures
  */
 
-#ifndef _MSDOS_FS_H
-#define _MSDOS_FS_H
-
-#include <sys/types.h>
 #include <linux/fs.h>
 
-#define MSDOS_ROOT_INO  1
+#define MSDOS_ROOT_INO  1 /* == MINIX_ROOT_INO */
 #define SECTOR_SIZE     512 /* sector size (bytes) */
 #define SECTOR_BITS	9 /* log2(SECTOR_SIZE) */
 #define MSDOS_DPB	(MSDOS_DPS*2) /* dir entries per block */
@@ -29,7 +28,7 @@
 #define ATTR_ARCH    32 /* archived */
 
 #define ATTR_NONE    0 /* no attribute bits */
-#define ATTR_UNUSED  (ATTR_VOLUME | ATTR_ARCH | ATTR_SYS)
+#define ATTR_UNUSED  (ATTR_VOLUME | ATTR_ARCH | ATTR_SYS | ATTR_HIDDEN)
 	/* attribute bits that are copied "as is" */
 
 #define DELETED_FLAG 0xe5 /* marks file as deleted when in name[0] */
@@ -44,9 +43,7 @@
 				   on */
 #define D_BINARY   5 /* i_data[5]: file contains non-text data */
 
-#define SET_DIRTY(i) (i)->i_dirt = (i)->i_data[D_DIRT] = 1
-
-#define MSDOS_SB(s) ((struct msdos_sb_info *) s)
+#define MSDOS_SB(s) (&((s)->u.msdos_sb))
 
 #define MSDOS_NAME 11 /* maximum name length */
 #define MSDOS_DOT    ".          " /* ".", padded to MSDOS_NAME chars */
@@ -68,20 +65,6 @@ struct msdos_boot_sector {
 	unsigned long hidden;	    /* hidden sectors (unused) */
 	unsigned long total_sect;   /* number of sectors (if sectors == 0) */
 };
-
-struct msdos_sb_info { /* space in struct super_block is 28 bytes */
-	unsigned short cluster_size; /* sectors/cluster */
-	unsigned char fats,fat_bits; /* number of FATs, FAT bits (12 or 16) */
-	unsigned short fat_start,fat_length; /* FAT start & length (sec.) */
-	unsigned short dir_start,dir_entries; /* root dir start & entries */
-	unsigned short data_start;   /* first data sector */
-	unsigned long clusters;      /* number of clusters */
-	uid_t fs_uid;
-	gid_t fs_gid;
-	unsigned short fs_umask;
-	unsigned char name_check; /* r = releaxed, n = normal, s = strict */
-	unsigned char conversion; /* b = binary, t = text, a = auto */
-}; /* 28 bytes */
 
 struct msdos_dir_entry {
 	char name[8],ext[3]; /* name and extension */
@@ -106,20 +89,19 @@ struct fat_cache {
 
 /* Convert attribute bits and a mask to the UNIX mode. */
 
-#define MSDOS_MKMODE(a,m) (m & (a & ATTR_RO ? 0444 : (a & ATTR_HIDDEN ? 0 : \
-    0777)))
+#define MSDOS_MKMODE(a,m) (m & (a & ATTR_RO ? 0444 : 0777))
 
 /* Convert the UNIX mode to MS-DOS attribute bits. */
 
-#define MSDOS_MKATTR(m) (!(m & 0600) ? ATTR_HIDDEN : ((m & 0600) == 0400 ? \
-    ATTR_RO : ATTR_NONE))
+#define MSDOS_MKATTR(m) (!(m & 0200) ? ATTR_RO : ATTR_NONE)
 
 
 static inline struct buffer_head *msdos_sread(int dev,int sector,void **start)
 {
  	struct buffer_head *bh;
 
-	if (!(bh = bread(dev,sector >> 1))) return NULL;
+	if (!(bh = bread(dev,sector >> 1, 1024)))
+		return NULL;
     	*start = bh->b_data+((sector & 1) << SECTOR_BITS);
 	return bh;
 }

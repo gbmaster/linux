@@ -1,13 +1,15 @@
-#include <signal.h>
-#include <errno.h>
+#include <linux/signal.h>
+#include <linux/errno.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <linux/stat.h>
+#include <linux/socket.h>
+#include <linux/fcntl.h>
+#include <linux/termios.h>
+
 #include <asm/system.h>
 #include <asm/segment.h>
-#include <sys/socket.h>
-#include <linux/fcntl.h>
-#include <termios.h>
+
 #include "kern_sock.h"
 #include "socketcall.h"
 

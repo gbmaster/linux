@@ -37,15 +37,13 @@ dup.o : dup.c /usr/src/linux/include/linux/unistd.h
 errno.o : errno.c 
 execve.o : execve.c /usr/src/linux/include/linux/unistd.h 
 malloc.o : malloc.c /usr/src/linux/include/linux/kernel.h /usr/src/linux/include/linux/mm.h \
-  /usr/src/linux/include/linux/fs.h /usr/src/linux/include/sys/types.h /usr/src/linux/include/stddef.h \
-  /usr/src/linux/include/sys/dirent.h /usr/src/linux/include/limits.h /usr/src/linux/include/sys/vfs.h \
-  /usr/src/linux/include/signal.h /usr/src/linux/include/asm/system.h 
+  /usr/src/linux/include/linux/fs.h /usr/src/linux/include/linux/limits.h /usr/src/linux/include/linux/wait.h \
+  /usr/src/linux/include/linux/types.h /usr/src/linux/include/linux/dirent.h /usr/src/linux/include/linux/vfs.h \
+  /usr/src/linux/include/linux/minix_fs_sb.h /usr/src/linux/include/linux/ext_fs_sb.h \
+  /usr/src/linux/include/linux/msdos_fs_sb.h /usr/src/linux/include/linux/signal.h \
+  /usr/src/linux/include/asm/system.h 
 open.o : open.c /usr/src/linux/include/linux/unistd.h /usr/src/linux/include/stdarg.h 
-setsid.o : setsid.c /usr/src/linux/include/sys/types.h /usr/src/linux/include/stddef.h \
-  /usr/src/linux/include/linux/unistd.h 
-string.o : string.c /usr/src/linux/include/linux/string.h /usr/src/linux/include/sys/types.h \
-  /usr/src/linux/include/stddef.h 
-wait.o : wait.c /usr/src/linux/include/linux/unistd.h /usr/src/linux/include/sys/wait.h \
-  /usr/src/linux/include/sys/types.h /usr/src/linux/include/stddef.h 
-write.o : write.c /usr/src/linux/include/linux/unistd.h /usr/src/linux/include/sys/types.h \
-  /usr/src/linux/include/stddef.h 
+setsid.o : setsid.c /usr/src/linux/include/linux/types.h /usr/src/linux/include/linux/unistd.h 
+string.o : string.c /usr/src/linux/include/linux/types.h /usr/src/linux/include/linux/string.h 
+wait.o : wait.c /usr/src/linux/include/linux/unistd.h /usr/src/linux/include/linux/types.h 
+write.o : write.c /usr/src/linux/include/linux/unistd.h /usr/src/linux/include/linux/types.h 

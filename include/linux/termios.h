@@ -1,7 +1,5 @@
-#ifndef _TERMIOS_H
-#define _TERMIOS_H
-
-#include <sys/types.h>
+#ifndef _LINUX_TERMIOS_H
+#define _LINUX_TERMIOS_H
 
 /* 0x54 is just a magic number to make these relatively uniqe ('T') */
 
@@ -37,6 +35,17 @@
 #define TIOCCONS	0x541D
 #define TIOCGSERIAL	0x541E
 #define TIOCSSERIAL	0x541F
+#define TIOCPKT		0x5420
+#define FIONBIO		0x5421
+#define TIOCNOTTY	0x5422
+
+/* Used for packet mode */
+#define TIOCPKT_FLUSHREAD	 1
+#define TIOCPKT_FLUSHWRITE	 2
+#define TIOCPKT_STOP		 4
+#define TIOCPKT_START		 8
+#define TIOCPKT_DOSTOP		16
+#define TIOCPKT_NOSTOP		32
 
 struct winsize {
 	unsigned short ws_row;
@@ -212,25 +221,5 @@ struct termios {
 #define	TCSANOW		0
 #define	TCSADRAIN	1
 #define	TCSAFLUSH	2
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern speed_t cfgetispeed(struct termios *termios_p);
-extern speed_t cfgetospeed(struct termios *termios_p);
-extern int cfsetispeed(struct termios *termios_p, speed_t speed);
-extern int cfsetospeed(struct termios *termios_p, speed_t speed);
-extern int tcdrain(int fildes);
-extern int tcflow(int fildes, int action);
-extern int tcflush(int fildes, int queue_selector);
-extern int tcgetattr(int fildes, struct termios *termios_p);
-extern int tcsendbreak(int fildes, int duration);
-extern int tcsetattr(int fildes, int optional_actions,
-	struct termios *termios_p);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

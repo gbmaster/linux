@@ -1,22 +1,22 @@
 /*
  *  linux/fs/ext/bitmap.c
  *
- *  (C) 1992  Remy Card (card@masi.ibp.fr)
+ *  Copyright (C) 1992  Remy Card (card@masi.ibp.fr)
  *
  *  from
  *
  *  linux/fs/minix/bitmap.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /* bitmap.c contains the code that handles the inode and block bitmaps */
 
 
-#include <linux/string.h>
 #include <linux/sched.h>
 #include <linux/ext_fs.h>
 #include <linux/kernel.h>
+#include <linux/string.h>
 
 #ifdef EXTFS_BITMAP
 

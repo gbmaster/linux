@@ -7,9 +7,8 @@
 
 #include <linux/sched.h>
 #include <linux/kernel.h>
-
-#include <sys/types.h>
-#include <errno.h>
+#include <linux/errno.h>
+#include <linux/types.h>
 
 #define _IODEBUG
 

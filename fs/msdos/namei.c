@@ -4,14 +4,14 @@
  *  Written 1992 by Werner Almesberger
  */
 
-#include <errno.h>
 #include <asm/segment.h>
-#include <linux/string.h>
-#include <linux/stat.h>
+
 #include <linux/sched.h>
 #include <linux/msdos_fs.h>
 #include <linux/kernel.h>
-
+#include <linux/errno.h>
+#include <linux/string.h>
+#include <linux/stat.h>
 
 /* MS-DOS "device special files" */
 
@@ -280,14 +280,17 @@ int msdos_rmdir(struct inode *dir,const char *name,int len)
 	res = -EBUSY;
 	if (dir->i_dev != inode->i_dev || dir == inode) goto rmdir_done;
 	if (inode->i_count > 1) goto rmdir_done;
-	res = -ENOTEMPTY;
-	pos = 0;
-	dbh = NULL;
-	while (msdos_get_entry(inode,&pos,&dbh,&dde) > -1)
-		if (dde->name[0] && ((unsigned char *) dde->name)[0] !=
-		    DELETED_FLAG && strncmp(dde->name,MSDOS_DOT,MSDOS_NAME) &&
-		    strncmp(dde->name,MSDOS_DOTDOT,MSDOS_NAME)) goto rmdir_done;
-	if (dbh) brelse(dbh);
+	if (inode->i_data[D_START]) { /* may be zero in mkdir */
+		res = -ENOTEMPTY;
+		pos = 0;
+		dbh = NULL;
+		while (msdos_get_entry(inode,&pos,&dbh,&dde) > -1)
+			if (dde->name[0] && ((unsigned char *) dde->name)[0] !=
+			    DELETED_FLAG && strncmp(dde->name,MSDOS_DOT,
+			    MSDOS_NAME) && strncmp(dde->name,MSDOS_DOTDOT,
+			    MSDOS_NAME)) goto rmdir_done;
+		if (dbh) brelse(dbh);
+	}
 	inode->i_nlink = 0;
 	dir->i_mtime = CURRENT_TIME;
 	inode->i_dirt = dir->i_dirt = 1;

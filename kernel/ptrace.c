@@ -6,12 +6,11 @@
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
+#include <linux/errno.h>
+#include <linux/ptrace.h>
 
 #include <asm/segment.h>
 #include <asm/system.h>
-
-#include <errno.h>
-#include <sys/ptrace.h>
 
 /*
  * does not yet catch signals sent when the child dies.
@@ -30,9 +29,6 @@
  * the local frame.
  */
 #define MAGICNUMBER 68
-
-void do_no_page(unsigned long, unsigned long, struct task_struct *, unsigned long);
-void write_verify(unsigned long);
 
 /* change a pid into a task struct. */
 static inline struct task_struct * get_task(int pid)
@@ -135,7 +131,7 @@ repeat:
 		goto repeat;
 	}
 	if (!(page & PAGE_RW)) {
-		write_verify(addr);
+		do_wp_page(0,addr,tsk,0);
 		goto repeat;
 	}
 	page &= 0xfffff000;

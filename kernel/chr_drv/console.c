@@ -1,7 +1,7 @@
 /*
  *  linux/kernel/console.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -37,40 +37,20 @@
 #include <linux/tty.h>
 #include <linux/config.h>
 #include <linux/kernel.h>
+#include <linux/string.h>
+#include <linux/errno.h>
 
 #include <asm/io.h>
 #include <asm/system.h>
 #include <asm/segment.h>
 
-#include <linux/string.h>
-#include <errno.h>
-
 #include <sys/kd.h>
 #include "vt_kern.h"
-
-/*
- * These are set up by the setup-routine at boot-time:
- */
-
-#define ORIG_X			(*(unsigned char *)0x90000)
-#define ORIG_Y			(*(unsigned char *)0x90001)
-#define ORIG_VIDEO_PAGE		(*(unsigned short *)0x90004)
-#define ORIG_VIDEO_MODE		((*(unsigned short *)0x90006) & 0xff)
-#define ORIG_VIDEO_COLS 	(((*(unsigned short *)0x90006) & 0xff00) >> 8)
-#define ORIG_VIDEO_LINES	((*(unsigned short *)0x9000e) & 0xff)
-#define ORIG_VIDEO_EGA_AX	(*(unsigned short *)0x90008)
-#define ORIG_VIDEO_EGA_BX	(*(unsigned short *)0x9000a)
-#define ORIG_VIDEO_EGA_CX	(*(unsigned short *)0x9000c)
-
-#define VIDEO_TYPE_MDA		0x10	/* Monochrome Text Display	*/
-#define VIDEO_TYPE_CGA		0x11	/* CGA Display 			*/
-#define VIDEO_TYPE_EGAM		0x20	/* EGA/VGA in Monochrome Mode	*/
-#define VIDEO_TYPE_EGAC		0x21	/* EGA/VGA in Color Mode	*/
 
 #define NPAR 16
 
 extern void vt_init(void);
-extern void keyboard_interrupt(int cpl);
+extern void keyboard_interrupt(int pt_regs);
 extern void set_leds(void);
 extern unsigned char kapplic;
 extern unsigned char ckmode;
@@ -1489,11 +1469,11 @@ void console_print(const char * b)
 		currcons = 0;
 	while (c = *(b++)) {
 		if (c == 10 || c == 13 || need_wrap) {
-			cr(currcons);
-			if (c == 10 || need_wrap)
+			if (c != 13)
 				lf(currcons);
-			need_wrap = 0;
-			continue;
+			cr(currcons);
+			if (c == 10 || c == 13)
+				continue;
 		}
 		*(char *) pos = c;
 		*(char *) (pos+1) = attr;

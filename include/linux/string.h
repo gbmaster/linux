@@ -1,13 +1,9 @@
-#ifndef _STRING_H_
-#define _STRING_H_
-
-#include <sys/types.h>
+#ifndef _LINUX_STRING_H_
+#define _LINUX_STRING_H_
 
 #ifndef NULL
 #define NULL ((void *) 0)
 #endif
-
-extern char * strerror(int errno);
 
 /*
  * This string-include defines all string functions as inline
@@ -18,7 +14,7 @@ extern char * strerror(int errno);
  * set, making the functions fast and clean. String instructions have been
  * used through-out, making for "slightly" unclear code :-)
  *
- *		(C) 1991 Linus Torvalds
+ *		Copyright (C) 1991, 1992 Linus Torvalds
  */
  
 extern inline char * strcpy(char * dest,const char *src)

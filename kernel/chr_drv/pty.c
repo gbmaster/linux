@@ -1,7 +1,7 @@
 /*
  *  linux/kernel/chr_drv/pty.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -12,8 +12,7 @@
  *	void spty_write(struct tty_struct * queue);
  */
 
-#include <errno.h>
-
+#include <linux/errno.h>
 #include <linux/sched.h>
 #include <linux/tty.h>
 #include <linux/fcntl.h>

@@ -6,19 +6,18 @@
  *  MS-DOS regular file handling primitives
  */
 
-#include <errno.h>
 #include <asm/segment.h>
 #include <asm/system.h>
-#include <linux/fcntl.h>
-#include <linux/stat.h>
+
 #include <linux/sched.h>
 #include <linux/fs.h>
 #include <linux/msdos_fs.h>
-
+#include <linux/errno.h>
+#include <linux/fcntl.h>
+#include <linux/stat.h>
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
-
 
 static int msdos_file_read(struct inode *inode,struct file *filp,char *buf,
     int count);
@@ -202,7 +201,6 @@ void msdos_truncate(struct inode *inode)
 {
 	int cluster;
 
-	if (!S_ISREG(inode->i_mode)) return;
 	cluster = SECTOR_SIZE*MSDOS_SB(inode->i_sb)->cluster_size;
 	(void) fat_free(inode,(inode->i_size+(cluster-1))/cluster);
 	inode->i_data[D_ATTRS] |= ATTR_ARCH;

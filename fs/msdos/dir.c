@@ -6,14 +6,13 @@
  *  MS-DOS directory handling functions
  */
 
-#include <errno.h>
 #include <asm/segment.h>
-#include <linux/stat.h>
+
+#include <linux/sched.h>
 #include <linux/fs.h>
 #include <linux/msdos_fs.h>
-
-/* for compatibility warnings */
-#include <linux/sched.h>
+#include <linux/errno.h>
+#include <linux/stat.h>
 
 static int msdos_dummy_read(struct inode *inode,struct file *filp,char *buf,
     int count);

@@ -1,5 +1,5 @@
-#ifndef _UN_H
-#define _UN_H
+#ifndef _LINUX_UN_H
+#define _LINUX_UN_H
 
 struct sockaddr_un {
 	u_short sun_family;		/* AF_UNIX */

@@ -1,15 +1,15 @@
 /*
  *  linux/fs/ioctl.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#include <errno.h>
-
 #include <asm/segment.h>
+
+#include <linux/sched.h>
+#include <linux/errno.h>
 #include <linux/string.h>
 #include <linux/stat.h>
-#include <linux/sched.h>
 
 int sys_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {	

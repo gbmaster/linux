@@ -11,6 +11,8 @@
 #include <linux/ctype.h>
 #include <linux/tty.h>
 #include <linux/mm.h>
+#include <linux/ptrace.h>
+
 #include <asm/io.h>
 #include <asm/system.h>
 
@@ -58,12 +60,15 @@ static void cur(int);
 static void kb_wait(void), kb_ack(void);
 static unsigned int handle_diacr(unsigned int);
 
-void keyboard_interrupt(int cpl)
+static struct pt_regs * pt_regs;
+
+void keyboard_interrupt(int int_pt_regs)
 {
 	static unsigned char rep = 0xff, repke0 = 0;
 	unsigned char scancode, x;
 	struct tty_struct * tty = TTY_TABLE(0);
 
+	pt_regs = (struct pt_regs *) int_pt_regs;
 	scancode=inb_p(0x60);
 	x=inb_p(0x61);
 	outb_p(x|0x80, 0x61);
@@ -229,11 +234,28 @@ static void uncaps(int sc)
 	kmode &= ~CAPSDOWN;
 }
 
+static void show_ptregs(void)
+{
+	printk("\nEIP: %04x:%08x",0xffff & pt_regs->cs,pt_regs->eip);
+	if (pt_regs->cs & 3)
+		printk(" ESP: %04x:%08x",0xffff & pt_regs->cs,pt_regs->eip);
+	printk(" EFLAGS: %08x",pt_regs->eflags);
+	printk("\nEAX: %08x EBX: %08x ECX: %08x EDX: %08x",
+		pt_regs->orig_eax,pt_regs->ebx,pt_regs->ecx,pt_regs->edx);
+	printk("\nESI: %08x EDI: %08x EBP: %08x",
+		pt_regs->esi, pt_regs->edi, pt_regs->ebp);
+	printk(" DS: %04x ES: %04x FS: %04x GS: %04x\n",
+		0xffff & pt_regs->ds,0xffff & pt_regs->es,
+		0xffff & pt_regs->fs,0xffff & pt_regs->gs);
+}
+
 static void scroll(int sc)
 {
 	if (kmode & (LSHIFT | RSHIFT))
 		show_mem();
-	else
+	else if (kmode & (ALT | ALTGR))
+		show_ptregs();
+	else if (kmode & (LCTRL | RCTRL))
 		show_state();
 	kleds ^= SCRLED;
 	set_leds();
@@ -776,6 +798,7 @@ static unsigned char alt_map[] = {
           0 };
 
 #elif defined KBD_SG
+
 static unsigned char key_map[] = {
           0,   27,  '1',  '2',  '3',  '4',  '5',  '6',
         '7',  '8',  '9',  '0', '\'',  '^',  127,    9,
@@ -790,6 +813,7 @@ static unsigned char key_map[] = {
           0,    0,    0,    0,    0,    0,  '<',    0,
           0,    0,    0,    0,    0,    0,    0,    0,
           0 };
+
 static unsigned char shift_map[] = {
           0,   27,  '+',  '"',  '*',    0,  '%',  '&',
         '/',  '(',  ')',  '=',  '?',  '`',  127,    9,
@@ -804,6 +828,7 @@ static unsigned char shift_map[] = {
           0,    0,    0,    0,    0,    0,  '>',    0,
           0,    0,    0,    0,    0,    0,    0,    0,
           0 };
+
 static unsigned char alt_map[] = {
           0,    0,    0,  '@',  '#',    0,    0,    0,
         '|',    0,    0,    0, '\'',  '~',    0,    0,
@@ -818,7 +843,9 @@ static unsigned char alt_map[] = {
           0,    0,    0,    0,    0,    0, '\\',    0,
           0,    0,    0,    0,    0,    0,    0,    0,
           0 };
+
 #elif defined KBD_SG_LATIN1
+
 static unsigned char key_map[] = {
           0,   27,  '1',  '2',  '3',  '4',  '5',  '6',
         '7',  '8',  '9',  '0', '\'',  '^',  127,    9,
@@ -833,6 +860,7 @@ static unsigned char key_map[] = {
           0,    0,    0,    0,    0,    0,  '<',    0,
           0,    0,    0,    0,    0,    0,    0,    0,
           0 };
+
 static unsigned char shift_map[] = {
           0,   27,  '+',  '"',  '*',  231,  '%',  '&',
         '/',  '(',  ')',  '=',  '?',  '`',  127,    9,
@@ -847,6 +875,7 @@ static unsigned char shift_map[] = {
           0,    0,    0,    0,    0,    0,  '>',    0,
           0,    0,    0,    0,    0,    0,    0,    0,
           0 };
+
 static unsigned char alt_map[] = {
           0,    0,    0,  '@',  '#',    0,    0,  172,
         '|',  162,    0,    0, '\'',  '~',    0,    0,
@@ -861,6 +890,54 @@ static unsigned char alt_map[] = {
           0,    0,    0,    0,    0,    0, '\\',    0,
           0,    0,    0,    0,    0,    0,    0,    0,
           0 };
+
+#elif defined KBD_NO
+
+static unsigned char key_map[] = {
+	  0,   27,  '1',  '2',  '3',  '4',  '5',  '6',
+	'7',  '8',  '9',  '0',  '+', '\\',  127,    9,
+	'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',
+	'o',  'p',  '}',  '~',   13,    0,  'a',  's',
+	'd',  'f',  'g',  'h',  'j',  'k',  'l',  '|',
+        '{',  '|',    0, '\'',  'z',  'x',  'c',  'v',
+	'b',  'n',  'm',  ',',  '.',  '-',    0,  '*',
+	  0,   32,    0,    0,    0,    0,    0,    0,
+	  0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,  '-',    0,    0,    0,  '+',    0,
+          0,    0,    0,    0,    0,    0,  '<',    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0 };
+
+static unsigned char shift_map[] = {
+	  0,   27,  '!', '\"',  '#',  '$',  '%',  '&',
+	'/',  '(',  ')',  '=',  '?',  '`',  127,    9, 
+	'Q',  'W',  'E',  'R',  'T',  'Y',  'U',  'I',
+	'O',  'P',  ']',  '^',   13,    0,  'A',  'S',
+	'D',  'F',  'G',  'H',  'J',  'K',  'L', '\\',
+	'[',    0,    0,  '*',  'Z',  'X',  'C',  'V',
+        'B',  'N',  'M',  ';',  ':',  '_',    0,  '*',
+	  0,   32,    0,    0,    0,    0,    0,    0,
+	  0,    0,    0,    0,    0,    0,    0,    0,
+	  0,    0,  '-',    0,    0,    0,  '+',    0,
+	  0,    0,    0,    0,    0,    0,  '>',    0,
+	  0,    0,    0,    0,    0,    0,    0,    0,
+	  0 };
+
+static unsigned char alt_map[] = {
+	  0,    0,    0,  '@',    0,  '$',    0,    0,
+        '{',   '[',  ']', '}',    0, '\'',    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,  '~',   13,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0,    0,    0,    0,    0,    0,    0,    0,
+          0 };
+
 #else
 #error "KBD-type not defined"
 #endif

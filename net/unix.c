@@ -1,15 +1,17 @@
-#include <signal.h>
-#include <errno.h>
-#include <linux/string.h>
+#include <linux/signal.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
+#include <linux/errno.h>
+#include <linux/string.h>
 #include <linux/stat.h>
+#include <linux/socket.h>
+#include <linux/un.h>
+#include <linux/fcntl.h>
+#include <linux/termios.h>
+
 #include <asm/system.h>
 #include <asm/segment.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <linux/fcntl.h>
-#include <termios.h>
+
 #include "kern_sock.h"
 
 static struct unix_proto_data {
@@ -169,7 +171,7 @@ unix_proto_create(struct socket *sock, int protocol)
 		printk("unix_proto_create: can't allocate buffer\n");
 		return -ENOMEM;
 	}
-	if (!(upd->buf = (char *)get_free_page())) {
+	if (!(upd->buf = (char *)get_free_page(GFP_USER))) {
 		printk("unix_proto_create: can't get page!\n");
 		unix_data_deref(upd);
 		return -ENOMEM;

@@ -1,7 +1,7 @@
 /*
  *  linux/kernel/sys_call.S
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -168,27 +168,6 @@ ret_from_sys_call:
 	iret
 
 .align 2
-_coprocessor_error:
-	pushl $-1		# mark this as an int. 
-	SAVE_ALL
-	pushl $ret_from_sys_call
-	jmp _math_error
-
-.align 2
-_device_not_available:
-	pushl $-1		# mark this as an int
-	SAVE_ALL
-	pushl $ret_from_sys_call
-	clts				# clear TS so that we can use math
-	movl %cr0,%eax
-	testl $0x4,%eax			# EM (math emulation bit)
-	je _math_state_restore
-	pushl $0		# temporary storage for ORIG_EIP
-	call _math_emulate
-	addl $4,%esp
-	ret
-
-.align 2
 _sys_execve:
 	lea (EIP+4)(%esp),%eax  # don't forget about the return address.
 	pushl %eax
@@ -228,9 +207,29 @@ error_code:
 	addl $8,%esp
 	jmp ret_from_sys_call
 
+.align 2
+_coprocessor_error:
+	pushl $0
+	pushl $_do_coprocessor_error
+	jmp error_code
+
+.align 2
+_device_not_available:
+	pushl $-1		# mark this as an int
+	SAVE_ALL
+	pushl $ret_from_sys_call
+	clts				# clear TS so that we can use math
+	movl %cr0,%eax
+	testl $0x4,%eax			# EM (math emulation bit)
+	je _math_state_restore
+	pushl $0		# temporary storage for ORIG_EIP
+	call _math_emulate
+	addl $4,%esp
+	ret
+
 _debug:
 	pushl $0
-	pushl $_do_int3		# _do_debug
+	pushl $_do_debug
 	jmp error_code
 
 _nmi:

@@ -6,7 +6,7 @@
 #include <linux/config.h>
 SYSSIZE = DEF_SYSSIZE
 !
-!	bootsect.s		(C) 1991 Linus Torvalds
+!	bootsect.s		Copyright (C) 1991, 1992 Linus Torvalds
 !	modified by Drew Eckhardt
 !	modified by Bruce Evans (bde)
 !

@@ -1,7 +1,7 @@
 /*
  *  linux/fs/super.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -14,11 +14,10 @@
 #include <linux/msdos_fs.h>
 #include <linux/kernel.h>
 #include <linux/stat.h>
+#include <linux/errno.h>
+
 #include <asm/system.h>
 #include <asm/segment.h>
-
-#include <errno.h>
-
 
 int sync_dev(int dev);
 void wait_for_keypress(void);
@@ -139,28 +138,16 @@ static struct super_block * read_super(int dev,char *name,int flags,void *data)
 		return(NULL);
 	s->s_dev = dev;
 	s->s_covered = NULL;
-	s->s_time = 0;
 	s->s_rd_only = 0;
 	s->s_dirt = 0;
 	return(s);
 }
 
-int sys_umount(char * dev_name)
+static int do_umount(int dev)
 {
-	struct inode * inode;
 	struct super_block * sb;
-	int dev;
+	struct inode * inode;
 
-	if (!suser())
-		return -EPERM;
-	if (!(inode = namei(dev_name)))
-		return -ENOENT;
-	dev = inode->i_rdev;
-	if (!S_ISBLK(inode->i_mode)) {
-		iput(inode);
-		return -ENOTBLK;
-	}
-	iput(inode);
 	if (dev==ROOT_DEV)
 		return -EBUSY;
 	if (!(sb=get_super(dev)) || !(sb->s_covered))
@@ -181,6 +168,29 @@ int sys_umount(char * dev_name)
 	if (sb->s_op && sb->s_op->write_super && sb->s_dirt)
 		sb->s_op->write_super (sb);
         put_super(dev);
+	return 0;
+}
+
+int sys_umount(char * dev_name)
+{
+	struct inode * inode;
+	int dev,retval;
+
+	if (!suser())
+		return -EPERM;
+	if (!(inode = namei(dev_name)))
+		return -ENOENT;
+	dev = inode->i_rdev;
+	if (!S_ISBLK(inode->i_mode)) {
+		iput(inode);
+		return -ENOTBLK;
+	}
+	retval = do_umount(dev);
+	if (!retval && MAJOR(dev) < MAX_BLKDEV &&
+	    blkdev_fops[MAJOR(dev)]->release)
+		blkdev_fops[MAJOR(dev)]->release(inode,NULL);
+	iput(inode);
+	if (retval) return retval;
         sync_dev(dev);
 	return 0;
 }
@@ -261,13 +271,16 @@ int sys_mount(char * dev_name, char * dir_name, char * type,
 		retval = -EPERM;
 	else if (IS_NODEV(inode))
 		retval = -EACCES;
-	iput(inode);
-	if (retval)
+	if (!retval && blkdev_fops[MAJOR(dev)]->open)
+		retval = blkdev_fops[MAJOR(dev)]->open(inode,NULL);
+	if (retval) {
+		iput(inode);
 		return retval;
+	}
 	if ((new_flags & 0xffff0000) == 0xC0ED0000) {
 		flags = new_flags & 0xffff;
 		if (data && (unsigned long) data < TASK_SIZE)
-			page = get_free_page();
+			page = get_free_page(GFP_KERNEL);
 	}
 	if (page) {
 		i = TASK_SIZE - (unsigned long) data;
@@ -284,12 +297,16 @@ int sys_mount(char * dev_name, char * dir_name, char * type,
 		t = "minix";
 	retval = do_mount(dev,dir_name,t,flags,(void *) page);
 	free_page(page);
+	if (retval && blkdev_fops[MAJOR(dev)]->release)
+		blkdev_fops[MAJOR(dev)]->release(inode,NULL);
+	iput(inode);
 	return retval;
 }
 
 void mount_root(void)
 {
-	int i,free;
+	int i;
+	struct file_system_type * fs_type = file_systems;
 	struct super_block * p;
 	struct inode * mi;
 
@@ -303,31 +320,23 @@ void mount_root(void)
 	}
 	for(p = &super_block[0] ; p < &super_block[NR_SUPER] ; p++) {
 		p->s_dev = 0;
+		p->s_blocksize = 0;
 		p->s_lock = 0;
 		p->s_wait = NULL;
+		p->s_mounted = p->s_covered = NULL;
 	}
-	if (!(p=read_super(ROOT_DEV,"minix",0,NULL)))
-		panic("Unable to mount root");
- 	/*wait_for_keypress();
-	if (!(mi=iget(ROOT_DEV,MINIX_ROOT_INO)))
-		panic("Unable to read root i-node");
-	wait_for_keypress();*/
-	mi=p->s_mounted;
-	mi->i_count += 3 ;	/* NOTE! it is logically used 4 times, not 1 */
-	p->s_mounted = p->s_covered = mi;
-	p->s_flags = 0;
-	current->pwd = mi;
-	current->root = mi;
-	free=0;
-	i=p->s_nzones;
-	while (-- i >= 0)
-		if (!set_bit(i&8191,p->s_zmap[i>>13]->b_data))
-			free++;
-	printk("%d/%d free blocks\n\r",free,p->s_nzones);
-	free=0;
-	i=p->s_ninodes+1;
-	while (-- i >= 0)
-		if (!set_bit(i&8191,p->s_imap[i>>13]->b_data))
-			free++;
-	printk("%d/%d free inodes\n\r",free,p->s_ninodes);
+	while (fs_type->read_super && fs_type->name) {
+		p = read_super(ROOT_DEV,fs_type->name,0,NULL);
+		if (p) {
+			mi = p->s_mounted;
+			mi->i_count += 3 ;	/* NOTE! it is logically used 4 times, not 1 */
+			p->s_covered = mi;
+			p->s_flags = 0;
+			current->pwd = mi;
+			current->root = mi;
+			return;
+		}
+		fs_type++;
+	}
+	panic("Unable to mount root");
 }

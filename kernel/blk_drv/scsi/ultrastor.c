@@ -1,5 +1,5 @@
 /*
- *	ultrastor.c	(C) 1991 David B. Gentzel
+ *	ultrastor.c	Copyright (C) 1991, 1992 David B. Gentzel
  *	Low-level SCSI driver for UltraStor 14F
  *	by David B. Gentzel, Whitfield Software Services, Carnegie, PA
  *	    (gentzel@nova.enet.dec.com)
@@ -28,22 +28,21 @@
  *    commands to complete.  I hope to go back and beat it into shape, but
  *    PLEASE, anyone else who would like to, please make improvements!
  *
- *    By defining USE_QUEUECOMMAND as TRUE in ultrastor.h, you enable the
- *    queueing feature of the mid-level SCSI driver.  This should improve
- *    performance somewhat.  However, it does not seem to work.  I believe
- *    this is due to a bug in the mid-level driver, but I haven't looked
- *    too closely.
+ *    By defining NO_QUEUEING in ultrastor.h, you disable the queueing feature
+ *    of the mid-level SCSI driver.  Once I'm satisfied that the queueing
+ *    version is as stable as the non-queueing version, I'll eliminate this
+ *    option.
  */
 
 #include <linux/config.h>
 
 #ifdef CONFIG_SCSI_ULTRASTOR
 
-#include <stddef.h>
-
+#include <linux/stddef.h>
 #include <linux/string.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
+
 #include <asm/io.h>
 #include <asm/system.h>
 
@@ -156,7 +155,7 @@ static const unsigned short ultrastor_ports[] = {
 };
 #endif
 
-void ultrastor_interrupt(int cpl);
+void ultrastor_interrupt(void);
 
 static void (*ultrastor_done)(int, int) = 0;
 
@@ -195,7 +194,7 @@ int ultrastor_14f_detect(int hostnum)
 # ifdef PORT_OVERRIDE
 	    printk("US14F: detect: wrong product ID 0 - %02X\n", in_byte);
 # else
-	    printk("US14F: detect: no adapter at port %03X", PORT_ADDRESS);
+	    printk("US14F: detect: no adapter at port %03X\n", PORT_ADDRESS);
 # endif
 #endif
 #ifdef PORT_OVERRIDE
@@ -211,7 +210,7 @@ int ultrastor_14f_detect(int hostnum)
 # ifdef PORT_OVERRIDE
 	    printk("US14F: detect: wrong product ID 1 - %02X\n", in_byte);
 # else
-	    printk("US14F: detect: no adapter at port %03X", PORT_ADDRESS);
+	    printk("US14F: detect: no adapter at port %03X\n", PORT_ADDRESS);
 # endif
 #endif
 #ifdef PORT_OVERRIDE
@@ -292,18 +291,12 @@ int ultrastor_14f_detect(int hostnum)
 #endif
     host_number = hostnum;
     scsi_hosts[hostnum].this_id = config.ha_scsi_id;
-#if USE_QUEUECOMMAND
-    {
-   	struct sigaction sa;
-   	sa.sa_handler = ultrastor_interrupt;
-   	sa.sa_flags = SA_INTERRUPT;
-   	sa.sa_mask = 0;
-   	sa.sa_restorer = NULL;
-   	if (irqaction(config.interrupt,&sa)) {
-   		printk("unable to get IRQ%d for ultrastor controller\n",config.interrupt);
-   		return FALSE;
-   	}
-    }
+#ifndef NO_QUEUEING
+    set_intr_gate(0x20 + config.interrupt, ultrastor_interrupt);
+    /* gate to PIC 2 */
+    outb_p(inb_p(0x21) & ~BIT(2), 0x21);
+    /* enable the interrupt */
+    outb(inb_p(0xA1) & ~BIT(config.interrupt - 8), 0xA1);
 #endif
     return TRUE;
 }
@@ -341,9 +334,13 @@ int ultrastor_14f_queuecommand(unsigned char target, const void *cmnd,
     do
 	in_byte = inb_p(LCL_DOORBELL_INTR(PORT_ADDRESS));
     while (!aborted && (in_byte & 1));
-    if (aborted)
+    if (aborted) {
+#if (ULTRASTOR_DEBUG & (UD_COMMAND | UD_ABORT))
+	printk("US14F: queuecommand: aborted\n");
+#endif
 	/* ??? is this right? */
 	return (aborted << 16);
+    }
 
     /* Store pointer in OGM address bytes */
     outb_p(BYTE(&mscp, 0), OGM_DATA_PTR(PORT_ADDRESS + 0));
@@ -363,7 +360,7 @@ int ultrastor_14f_queuecommand(unsigned char target, const void *cmnd,
     return 0;
 }
 
-#if !USE_QUEUECOMMAND
+#ifdef NO_QUEUEING
 int ultrastor_14f_command(unsigned char target, const void *cmnd,
 			  void *buff, int bufflen)
 {
@@ -379,9 +376,13 @@ int ultrastor_14f_command(unsigned char target, const void *cmnd,
     do
 	in_byte = inb_p(SYS_DOORBELL_INTR(PORT_ADDRESS));
     while (!aborted && !(in_byte & 1));
-    if (aborted)
+    if (aborted) {
+#if (ULTRASTOR_DEBUG & (UD_COMMAND | UD_ABORT))
+	printk("US14F: command: aborted\n");
+#endif
 	/* ??? is this right? */
 	return (aborted << 16);
+    }
 
     /* Clean ICM slot (set ICMINT bit to 0) */
     outb_p(0x1, SYS_DOORBELL_INTR(PORT_ADDRESS));
@@ -398,7 +399,16 @@ int ultrastor_14f_command(unsigned char target, const void *cmnd,
 
 int ultrastor_14f_abort(int code)
 {
+#if (ULTRASTOR_DEBUG & UD_ABORT)
+    printk("US14F: abort: called\n");
+#endif
+
     aborted = (code ? code : DID_ABORT);
+
+#if (ULTRASTOR_DEBUG & UD_ABORT)
+    printk("US14F: abort: returning\n");
+#endif
+
     return 0;
 }
 
@@ -426,20 +436,68 @@ int ultrastor_14f_reset(void)
     return 0;
 }
 
-#if USE_QUEUECOMMAND
-void ultrastor_interrupt(int cpl)
+#ifndef NO_QUEUEING
+void ultrastor_interrupt_service(void)
 {
-    if (ultrastor_done == 0) {
-	printk("US14F: unexpected ultrastor interrupt\n\r");
-	/* ??? Anything else we should do here?  Reset? */
-	return;
-    }
-    printk("US14F: got an ultrastor interrupt: %u\n\r",
+#if (ULTRASTOR_DEBUG & UD_INTERRUPT)
+    printk("US14F: interrupt_service: called: status = %08X\n",
 	   (mscp.adapter_status << 16) | mscp.target_status);
-    ultrastor_done(host_number,
-		   (mscp.adapter_status << 16) | mscp.target_status);
-    ultrastor_done = 0;
+#endif
+
+    if (ultrastor_done == 0)
+	panic("US14F: interrupt_service: unexpected interrupt!\n");
+    else {
+	void (*done)(int, int);
+
+	/* Save ultrastor_done locally and zero before calling.  This is needed
+	   as once we call done, we may get another command queued before this
+	   interrupt service routine can return. */
+	done = ultrastor_done;
+	ultrastor_done = 0;
+
+	/* Clean ICM slot (set ICMINT bit to 0) */
+	outb_p(0x1, SYS_DOORBELL_INTR(PORT_ADDRESS));
+
+	/* Let the higher levels know that we're done */
+	/* ??? status is wrong here... */
+	done(host_number, (mscp.adapter_status << 16) | mscp.target_status);
+    }
+
+#if (ULTRASTOR_DEBUG & UD_INTERRUPT)
+    printk("US14F: interrupt_service: returning\n");
+#endif
 }
+
+__asm__("
+_ultrastor_interrupt:
+	cld
+	pushl %eax
+	pushl %ecx
+	pushl %edx
+	push %ds
+	push %es
+	push %fs
+	movl $0x10,%eax
+	mov %ax,%ds
+	mov %ax,%es
+	movl $0x17,%eax
+	mov %ax,%fs
+	movb $0x20,%al
+	outb %al,$0xA0		# EOI to interrupt controller #1
+	outb %al,$0x80		# give port chance to breathe
+	outb %al,$0x80
+	outb %al,$0x80
+	outb %al,$0x80
+	outb %al,$0x20
+	call _ultrastor_interrupt_service
+	pop %fs
+	pop %es
+	pop %ds
+	popl %edx
+	popl %ecx
+	popl %eax
+	iret
+");
 #endif
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef _SOCKET_H
-#define _SOCKET_H
+#ifndef _LINUX_SOCKET_H
+#define _LINUX_SOCKET_H
 
 struct sockaddr {
 	u_short sa_family;		/* address family, AF_xxx */
@@ -27,13 +27,4 @@ struct sockaddr {
 #define PF_UNIX		AF_UNIX
 #define PF_INET		AF_INET
 
-int socket(int family, int type, int protocol);
-int socketpair(int family, int type, int protocol, int sockvec[2]);
-int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
-int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
-int listen(int sockfd, int backlog);
-int accept(int sockfd, struct sockaddr *peer, int *paddrlen);
-int getsockname(int sockfd, struct sockaddr *addr, int *paddrlen);
-int getpeername(int sockfd, struct sockaddr *peer, int *paddrlen);
-
-#endif /* _SOCKET_H */
+#endif

@@ -1,7 +1,7 @@
 /*
  *  linux/kernel/serial.c
  *
- *  (C) 1991  Linus Torvalds
+ *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
 /*
@@ -13,9 +13,8 @@
  * and all interrupts pertaining to serial IO.
  */
 
-#include <signal.h>
-#include <errno.h>
-
+#include <linux/errno.h>
+#include <linux/signal.h>
 #include <linux/sched.h>
 #include <linux/timer.h>
 #include <linux/tty.h>
@@ -32,24 +31,6 @@ struct serial_struct serial_table[NR_SERIALS] = {
 	{ PORT_UNKNOWN, 2, 0x3E8, 4, NULL},
 	{ PORT_UNKNOWN, 3, 0x2E8, 3, NULL},
 };
-
-static void send_intr(struct serial_struct * info);
-
-static void modem_status_intr(struct serial_struct * info)
-{
-	unsigned char status = inb(info->port+6);
-
-	if (!(info->tty->termios.c_cflag & CLOCAL)) {
-		if ((status & 0x88) == 0x08 && info->tty->pgrp > 0)
-			kill_pg(info->tty->pgrp,SIGHUP,1);
-
-		if (info->tty->termios.c_cflag & CRTSCTS)
-			info->tty->stopped = !(status & 0x10);
-
-		if (!info->tty->stopped)
-			send_intr(info);
-	}
-}
 
 void send_break(unsigned int line)
 {
@@ -131,6 +112,22 @@ static void line_status_intr(struct serial_struct * info)
 /*	printk("line status: %02x\n",status); */
 }
 
+static void modem_status_intr(struct serial_struct * info)
+{
+	unsigned char status = inb(info->port+6);
+
+	if (!(info->tty->termios.c_cflag & CLOCAL)) {
+		if ((status & 0x88) == 0x08 && info->tty->pgrp > 0)
+			kill_pg(info->tty->pgrp,SIGHUP,1);
+
+		if (info->tty->termios.c_cflag & CRTSCTS)
+			info->tty->stopped = !(status & 0x10);
+
+		if (!info->tty->stopped)
+			send_intr(info);
+	}
+}
+
 static void (*jmp_table[4])(struct serial_struct *) = {
 	modem_status_intr,
 	send_intr,
@@ -173,22 +170,22 @@ static inline void do_rs_write(struct serial_struct * info)
 /*
  * IRQ routines: one per line
  */
-static void com1_IRQ(int cpl)
+static void com1_IRQ(int unused)
 {
 	check_tty(serial_table+0);
 }
 
-static void com2_IRQ(int cpl)
+static void com2_IRQ(int unused)
 {
 	check_tty(serial_table+1);
 }
 
-static void com3_IRQ(int cpl)
+static void com3_IRQ(int unused)
 {
 	check_tty(serial_table+2);
 }
 
-static void com4_IRQ(int cpl)
+static void com4_IRQ(int unused)
 {
 	check_tty(serial_table+3);
 }
@@ -304,16 +301,20 @@ void serial_close(unsigned line, struct file * filp)
 
 static void startup(unsigned short port)
 {
+	int i;
+
 	outb_p(0x03,port+3);	/* reset DLAB */
-	outb_p(0x0f,port+4);	/* set DTR,RTS, OUT_2 */
+	outb_p(0x0b,port+4);	/* set DTR,RTS, OUT_2 */
 	outb_p(0x0f,port+1);	/* enable all intrs */
 	inb_p(port+2);
 	inb_p(port+6);
 	inb_p(port+2);
 	inb_p(port+5);
-	do {		/* drain all of the stuck characters out of the port */
+	for (i = 0; i < 16 ; i++) {
 		inb_p(port+0);
-	} while (inb_p(port+5) & 1 == 1);
+		if (!(inb_p(port+5) & 1))
+			break;
+	}
 	inb_p(port+2);
 	inb_p(port+5);
 }
@@ -368,8 +369,12 @@ int serial_open(unsigned line, struct file * filp)
 	struct serial_struct * info;
 	int irq,retval;
 	unsigned short port;
-	void (*handler)(int) = serial_handler[line];
+	struct sigaction sa;
 
+	sa.sa_handler = serial_handler[line];
+	sa.sa_flags = SA_INTERRUPT;
+	sa.sa_mask = 0;
+	sa.sa_restorer = NULL;
 	if (line >= NR_SERIALS)
 		return -ENODEV;
 	info = serial_table + line;
@@ -378,7 +383,7 @@ int serial_open(unsigned line, struct file * filp)
 	irq = info->irq;
 	if (irq == 2)
 		irq = 9;
-	if (retval = request_irq(irq,handler))
+	if (retval = irqaction(irq,&sa))
 		return retval;
 	startup(port);
 	return 0;

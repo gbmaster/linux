@@ -4,14 +4,14 @@
  *  Written 1992 by Werner Almesberger
  */
 
-#include <errno.h>
-#include <linux/string.h>
-#include <linux/stat.h>
 #include <linux/msdos_fs.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>
-#include <asm/segment.h>
+#include <linux/errno.h>
+#include <linux/string.h>
+#include <linux/stat.h>
 
+#include <asm/segment.h>
 
 void msdos_put_inode(struct inode *inode)
 {
@@ -66,7 +66,7 @@ static int parse_options(char *options,char *check,char *conversion)
 		if (!strcmp(this,"check") && value) {
 			if (value[0] && !value[1] && strchr("rns",*value))
 				*check = *value;
-			else if (!strcmp(value,"releaxed")) *check = 'r';
+			else if (!strcmp(value,"relaxed")) *check = 'r';
 			else if (!strcmp(value,"normal")) *check = 'n';
 			else if (!strcmp(value,"strict")) *check = 's';
 			else return 0;
@@ -100,7 +100,7 @@ struct super_block *msdos_read_super(struct super_block *s,void *data)
 	}
 	cache_init();
 	lock_super(s);
-	bh = bread(s->s_dev,0);
+	bh = bread(s->s_dev, 0, BLOCK_SIZE);
 	free_super(s);
 	if (bh == NULL) {
 		s->s_dev = 0;
@@ -108,6 +108,7 @@ struct super_block *msdos_read_super(struct super_block *s,void *data)
 		return NULL;
 	}
 	b = (struct msdos_boot_sector *) bh->b_data;
+	s->s_blocksize = 1024;	/* we cannot handle anything else yet */
 	MSDOS_SB(s)->cluster_size = b->cluster_size;
 	MSDOS_SB(s)->fats = b->fats;
 	MSDOS_SB(s)->fat_start = b->reserved;
@@ -122,7 +123,7 @@ struct super_block *msdos_read_super(struct super_block *s,void *data)
 	    0;
 	MSDOS_SB(s)->fat_bits = MSDOS_SB(s)->clusters > MSDOS_FAT12 ? 16 : 12;
 	brelse(bh);
-printk("[MS-DOS FS Rel. alpha.5, FAT %d, check=%c, conv=%c]\r\n",
+printk("[MS-DOS FS Rel. alpha.6, FAT %d, check=%c, conv=%c]\r\n",
   MSDOS_SB(s)->fat_bits,check,conversion);
 printk("[me=0x%x,cs=%d,#f=%d,fs=%d,fl=%d,ds=%d,de=%d,data=%d,se=%d,ts=%d]\r\n",
   b->media,MSDOS_SB(s)->cluster_size,MSDOS_SB(s)->fats,MSDOS_SB(s)->fat_start,
@@ -214,7 +215,7 @@ void msdos_read_inode(struct inode *inode)
 		inode->i_mtime = inode->i_atime = inode->i_ctime = 0;
 		return;
 	}
-	if (!(bh = bread(inode->i_dev,inode->i_ino >> MSDOS_DPB_BITS)))
+	if (!(bh = bread(inode->i_dev,inode->i_ino >> MSDOS_DPB_BITS, BLOCK_SIZE)))
 	    panic("unable to read i-node block");
 	raw_entry = &((struct msdos_dir_entry *) (bh->b_data))
 	    [inode->i_ino & (MSDOS_DPB-1)];
@@ -255,7 +256,7 @@ void msdos_write_inode(struct inode *inode)
 
 	inode->i_dirt = 0;
 	if (inode->i_ino == MSDOS_ROOT_INO || !inode->i_nlink) return;
-	if (!(bh = bread(inode->i_dev,inode->i_ino >> MSDOS_DPB_BITS)))
+	if (!(bh = bread(inode->i_dev,inode->i_ino >> MSDOS_DPB_BITS, BLOCK_SIZE)))
 	    panic("unable to read i-node block");
 	raw_entry = &((struct msdos_dir_entry *) (bh->b_data))
 	    [inode->i_ino & (MSDOS_DPB-1)];
