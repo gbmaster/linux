@@ -1,4 +1,4 @@
-/* linux/arch/i386/kernel/scx200.c 
+/* linux/drivers/char/scx200.c 
 
    Copyright (c) 2001,2002 Christer Weinigel <wingel@nano-system.com>
 
