@@ -1,0 +1,11 @@
+--- arch/mips/sgi-ip22/Makefile	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/sgi-ip22/Makefile	2004-01-06 12:46:22.000000000 +0000
+@@ -16,7 +16,7 @@
+ 	   ip22-time.o ip22-rtc.o ip22-nvram.o ip22-reset.o \
+ 	   ip22-setup.o ip22-ksyms.o
+ 
+-obj-$(CONFIG_IP22_EISA)	+= ip22-eisa.o
++obj-$(CONFIG_EISA)	+= ip22-eisa.o
+ 
+ export-objs	:= ip22-ksyms.o
+ 

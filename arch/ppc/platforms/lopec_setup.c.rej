@@ -1,0 +1,11 @@
+--- arch/ppc/platforms/lopec_setup.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/ppc/platforms/lopec_setup.c	2004-01-06 12:46:03.000000000 +0000
+@@ -299,7 +299,7 @@
+ 	serial_req.line = 0;
+ 	serial_req.baud_base = BASE_BAUD;
+ 	serial_req.irq = UART0_INT;
+-	serial_req.flags = ASYNC_BOOT_AUTOCONF | ASYNC_SKIP_TEST;
++	serial_req.flags = ASYNC_BOOT_AUTOCONF;
+ 	serial_req.io_type = SERIAL_IO_MEM;
+ 	serial_req.iomem_base = ioremap(UART0_PORT, 8);
+ 

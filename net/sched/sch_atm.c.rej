@@ -1,0 +1,11 @@
+--- net/sched/sch_atm.c	2003-08-25 11:44:44.000000000 +0000
++++ net/sched/sch_atm.c	2004-01-06 12:44:19.000000000 +0000
+@@ -165,7 +165,7 @@
+ 	while ((filter = flow->filter_list)) {
+ 		DPRINTK("destroy_filters: destroying filter %p\n",filter);
+ 		flow->filter_list = filter->next;
+-		filter->ops->destroy(filter);
++		tcf_destroy(filter);
+ 	}
+ }
+ 

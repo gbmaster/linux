@@ -1,0 +1,23 @@
+--- drivers/char/misc.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/char/misc.c	2004-01-06 12:43:54.000000000 +0000
+@@ -66,7 +66,6 @@
+ static unsigned char misc_minors[DYNAMIC_MINORS / 8];
+ 
+ extern int psaux_init(void);
+-extern void gfx_register(void);
+ extern int rtc_DP8570A_init(void);
+ extern int rtc_MK48T08_init(void);
+ extern int ds1286_init(void);
+@@ -264,12 +263,6 @@
+ #ifdef CONFIG_PMAC_PBOOK
+ 	pmu_device_init();
+ #endif
+-#ifdef CONFIG_SGI_NEWPORT_GFX
+-	gfx_register ();
+-#endif
+-#ifdef CONFIG_SGI_NEWPORT_GFX
+-	gfx_register ();
+-#endif
+ #ifdef CONFIG_TOSHIBA
+ 	tosh_init();
+ #endif

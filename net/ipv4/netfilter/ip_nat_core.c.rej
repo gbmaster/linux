@@ -1,0 +1,11 @@
+--- net/ipv4/netfilter/ip_nat_core.c	2003-11-28 18:26:21.000000000 +0000
++++ net/ipv4/netfilter/ip_nat_core.c	2004-01-06 12:42:49.000000000 +0000
+@@ -815,7 +815,7 @@
+ 
+ 		/* Have to grab read lock before sibling_list traversal */
+ 		READ_LOCK(&ip_conntrack_lock);
+-		list_for_each(cur_item, &ct->sibling_list) { 
++		list_for_each_prev(cur_item, &ct->sibling_list) { 
+ 			exp = list_entry(cur_item, struct ip_conntrack_expect, 
+ 					 expected_list);
+ 					 

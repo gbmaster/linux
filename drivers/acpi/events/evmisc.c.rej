@@ -1,0 +1,12 @@
+--- drivers/acpi/events/evmisc.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/acpi/events/evmisc.c	2004-01-06 12:44:57.000000000 +0000
+@@ -195,7 +195,8 @@
+ 		/* There is no per-device notify handler for this device */
+ 
+ 		ACPI_DEBUG_PRINT ((ACPI_DB_INFO,
+-			"No notify handler for [%4.4s] node %p\n", node->name.ascii, node));
++			"No notify handler for [%4.4s] node %p\n",
++			acpi_ut_get_node_name (node), node));
+ 	}
+ 
+ 	return (status);

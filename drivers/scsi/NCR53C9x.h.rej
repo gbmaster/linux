@@ -1,0 +1,12 @@
+--- drivers/scsi/NCR53C9x.h	2001-09-14 21:40:00.000000000 +0000
++++ drivers/scsi/NCR53C9x.h	2004-01-06 12:43:34.000000000 +0000
+@@ -639,8 +639,7 @@
+ 
+ 
+ /* External functions */
+-extern inline void esp_cmd(struct NCR_ESP *esp, struct ESP_regs *eregs,
+-			   unchar cmd);
++extern void esp_cmd(struct NCR_ESP *esp, struct ESP_regs *eregs, unchar cmd);
+ extern struct NCR_ESP *esp_allocate(Scsi_Host_Template *, void *);
+ extern void esp_deallocate(struct NCR_ESP *);
+ extern void esp_release(void);

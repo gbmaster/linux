@@ -1,0 +1,10 @@
+--- arch/ppc/configs/TQM860L_defconfig	2003-11-28 18:26:19.000000000 +0000
++++ arch/ppc/configs/TQM860L_defconfig	2004-01-06 12:43:32.000000000 +0000
+@@ -70,6 +70,7 @@
+ CONFIG_BINFMT_ELF=y
+ CONFIG_KERNEL_ELF=y
+ # CONFIG_BINFMT_MISC is not set
++# CONFIG_OOM_KILLER is not set
+ # CONFIG_HOTPLUG is not set
+ # CONFIG_PCMCIA is not set
+ 

@@ -1,0 +1,18 @@
+--- fs/readdir.c	2002-08-03 00:39:45.000000000 +0000
++++ fs/readdir.c	2004-01-06 12:44:25.000000000 +0000
+@@ -69,6 +69,7 @@
+ 			loff_t n = file->f_pos - 2;
+ 
+ 			spin_lock(&dcache_lock);
++			list_del(&cursor->d_child);
+ 			p = file->f_dentry->d_subdirs.next;
+ 			while (n && p != &file->f_dentry->d_subdirs) {
+ 				struct dentry *next;
+@@ -77,7 +78,6 @@
+ 					n--;
+ 				p = p->next;
+ 			}
+-			list_del(&cursor->d_child);
+ 			list_add_tail(&cursor->d_child, p);
+ 			spin_unlock(&dcache_lock);
+ 		}

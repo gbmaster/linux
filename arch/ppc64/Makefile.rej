@@ -1,0 +1,39 @@
+--- arch/ppc64/Makefile	2003-08-25 11:44:40.000000000 +0000
++++ arch/ppc64/Makefile	2004-01-06 12:46:19.000000000 +0000
+@@ -19,11 +19,11 @@
+ CHECKS		= checks
+ endif
+ 
+-HAS_BIARCH      := $(shell if gcc -m64 -S -o /dev/null -xc /dev/null > /dev/null 2>&1; then echo y; else echo n; fi;)
++HAS_BIARCH      := $(shell if $(CC) -m64 -S -o /dev/null -xc /dev/null > /dev/null 2>&1; then echo y; else echo n; fi;)
+ ifeq ($(HAS_BIARCH),y)
+ AS              := $(AS) -64
+ LD              := $(LD) -m elf64ppc
+-CC		:= gcc -m64
++CC		:= $(CC) -m64
+ endif
+ 
+ LINKFLAGS	= -T arch/ppc64/vmlinux.lds -Bstatic \
+@@ -33,6 +33,11 @@
+ 		-mtraceback=full
+ CPP		= $(CC) -E $(CFLAGS)
+ 
++HAVE_ZERO_BSS := $(shell if $(CC) -fno-zero-initialized-in-bss -S -o /dev/null -xc /dev/null > /dev/null 2>&1; then echo y; else echo n; fi)
++
++ifeq ($(HAVE_ZERO_BSS),y)
++CFLAGS		+= -fno-zero-initialized-in-bss
++endif
+ 
+ HEAD := arch/ppc64/kernel/head.o
+ 
+@@ -45,10 +50,6 @@
+ SUBDIRS += arch/ppc64/xmon
+ CORE_FILES += arch/ppc64/xmon/x.o
+ endif
+-ifdef CONFIG_KDB
+-SUBDIRS += arch/ppc64/kdb
+-CORE_FILES += arch/ppc64/kdb/kdba.o
+-endif
+ 
+ MAKEBOOT = $(MAKE) -C arch/$(ARCH)/boot
+ 

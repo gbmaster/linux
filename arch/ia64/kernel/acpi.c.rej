@@ -1,0 +1,20 @@
+--- arch/ia64/kernel/acpi.c	2003-11-28 18:26:19.000000000 +0000
++++ arch/ia64/kernel/acpi.c	2004-01-06 12:44:29.000000000 +0000
+@@ -96,7 +96,7 @@
+ 	}
+ 
+ 	if (!strcmp(hdr->oem_id, "HP")) {
+-		return "hpzx1";
++		return "hp";
+ 	}
+ 	else if (!strcmp(hdr->oem_id, "SGI")) {
+ 		return "sn2";
+@@ -107,7 +107,7 @@
+ # if defined (CONFIG_IA64_HP_SIM)
+ 	return "hpsim";
+ # elif defined (CONFIG_IA64_HP_ZX1)
+-	return "hpzx1";
++	return "hp";
+ # elif defined (CONFIG_IA64_SGI_SN2)
+ 	return "sn2";
+ # elif defined (CONFIG_IA64_DIG)

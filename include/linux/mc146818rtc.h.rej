@@ -1,0 +1,15 @@
+--- include/linux/mc146818rtc.h	2001-11-22 19:46:58.000000000 +0000
++++ include/linux/mc146818rtc.h	2004-01-06 12:45:57.000000000 +0000
+@@ -98,4 +98,12 @@
+ #define BIN_TO_BCD(val) ((val)=(((val)/10)<<4) + (val)%10)
+ #endif
+ 
++#ifndef RTC_IO_EXTENT
++#define RTC_IO_EXTENT	0x10	/* Only really two ports, but...	*/
++#endif
++
++#ifndef RTC_IOMAPPED
++#define RTC_IOMAPPED	1	/* Default to I/O mapping. */
++#endif
++
+ #endif /* _MC146818RTC_H */

@@ -1,0 +1,49 @@
+--- arch/mips64/mm/tlb-r4k.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips64/mm/tlb-r4k.c	2004-01-06 12:45:37.000000000 +0000
+@@ -335,31 +365,29 @@
+ 
+ static void __init probe_tlb(unsigned long config)
+ {
+-        if (!(config & (1 << 31))) {
+-	        /*
+-		 * Not a MIPS64 complainant CPU.
+-		 * Config 1 register not supported, we assume R4k style.
+-		 */
+-	        current_cpu_data.tlbsize = 48;
+-	} else {
+-        	unsigned long config1;
++	struct cpuinfo_mips *c = &current_cpu_data;
++	unsigned int config1;
+ 
+-	        config1 = read_c0_config1();
+-		if (!((config >> 7) & 3))
+-		        panic("No MMU present");
+-		else
+-		        current_cpu_data.tlbsize = ((config1 >> 25) & 0x3f) + 1;
+-	}
++	/*
++	 * If this isn't a MIPS32 / MIPS64 compliant CPU.  Config 1 register
++	 * is not supported, we assume R4k style.  Cpu probing already figured
++	 * out the number of tlb entries.
++	 */
++	if ((c->processor_id  & 0xff0000) == PRID_COMP_LEGACY)
++		return;
++
++	config1 = read_c0_config1();
++	if (!((config1 >> 7) & 3))
++		panic("No MMU present");
+ 
+-	printk("Number of TLB entries %d.\n", current_cpu_data.tlbsize);
++	c->tlbsize = ((config1 >> 25) & 0x3f) + 1;
+ }
+ 
+ void __init r4k_tlb_init(void)
+ {
+ 	unsigned long config = read_c0_config();
+-
+ 	probe_tlb(config);
+-	write_c0_pagemask(PM_4K);
++	write_c0_pagemask(PM_DEFAULT_MASK);
+ 	write_c0_wired(0);
+ 	temp_tlb_entry = current_cpu_data.tlbsize - 1;
+ 	local_flush_tlb_all();

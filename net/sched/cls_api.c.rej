@@ -1,0 +1,13 @@
+--- net/sched/cls_api.c	2001-12-21 17:42:06.000000000 +0000
++++ net/sched/cls_api.c	2004-01-06 12:43:12.000000000 +0000
+@@ -246,9 +246,7 @@
+ 			*back = tp->next;
+ 			spin_unlock_bh(&dev->queue_lock);
+ 			write_unlock(&qdisc_tree_lock);
+-
+-			tp->ops->destroy(tp);
+-			kfree(tp);
++			tcf_destroy(tp);
+ 			err = 0;
+ 			goto errout;
+ 		}

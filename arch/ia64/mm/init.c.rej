@@ -1,0 +1,12 @@
+--- arch/ia64/mm/init.c	2003-11-28 18:26:19.000000000 +0000
++++ arch/ia64/mm/init.c	2004-01-06 12:44:07.000000000 +0000
+@@ -488,7 +488,8 @@
+ {
+ 	char byte;
+ 
+-	return __get_user(byte, (char *) page) == 0;
++	return     (__get_user(byte, (char *) page) == 0)
++		&& (__get_user(byte, (char *) (page + 1) - 1) == 0);
+ }
+ 
+ #define GRANULEROUNDDOWN(n) ((n) & ~(IA64_GRANULE_SIZE-1))

@@ -1,0 +1,11 @@
+--- net/sched/sch_red.c	2003-08-25 11:44:44.000000000 +0000
++++ net/sched/sch_red.c	2004-01-06 12:46:29.000000000 +0000
+@@ -257,7 +257,7 @@
+ 	if (q->qave < q->qth_min) {
+ 		q->qcount = -1;
+ enqueue:
+-		if (sch->stats.backlog <= q->limit) {
++		if (sch->stats.backlog + skb->len <= q->limit) {
+ 			__skb_queue_tail(&sch->q, skb);
+ 			sch->stats.backlog += skb->len;
+ 			sch->stats.bytes += skb->len;

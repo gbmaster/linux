@@ -202,6 +202,12 @@ static inline void              HvCall_sendLpProd(HvLpIndex lpindex)
 }
 
 //=====================================================================
+static inline void              HvCall_sendLpProd(HvLpIndex lpindex)
+{
+	HvCall1( HvCallBaseSendLpProd, lpindex );
+}
+
+//=====================================================================
 static inline void		HvCall_terminateMachineSrc(void)
 {
 	HvCall0( HvCallBaseTerminateMachineSrc );

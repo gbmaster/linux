@@ -1,0 +1,34 @@
+--- arch/ppc/boot/common/misc-simple.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/ppc/boot/common/misc-simple.c	2004-01-06 12:45:48.000000000 +0000
+@@ -75,16 +75,9 @@
+ extern void gunzip(void *, int, unsigned char *, int *);
+ extern void serial_fixups(void);
+ 
+-/* Allow decompress_kernel to be hooked into.  This is the default. */
+-void * __attribute__ ((weak))
+-load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
+-		void *bp)
+-{
+-	return decompress_kernel(load_addr, num_words, cksum, bp);
+-}
+-
+-struct bi_record *
+-decompress_kernel(unsigned long load_addr, int num_words, unsigned long cksum)
++static struct bi_record *
++decompress_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
++		void *ignored)
+ {
+ #ifdef INTERACTIVE_CONSOLE
+ 	int timer = 0;
+@@ -271,3 +264,11 @@
+ 
+ 	return (struct bi_record *)rec_loc;
+ }
++
++/* Allow decompress_kernel to be hooked into.  This is the default. */
++void * __attribute__ ((weak))
++load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
++		void *bp)
++{
++	return decompress_kernel(load_addr, num_words, cksum, bp);
++}

@@ -1,0 +1,34 @@
+--- arch/mips/mm/c-r3k.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/mm/c-r3k.c	2004-01-06 12:44:43.000000000 +0000
+@@ -23,9 +23,6 @@
+ #include <asm/bootinfo.h>
+ #include <asm/cpu.h>
+ 
+-void r3k_clear_page(void * page);
+-void r3k_copy_page(void * to, void * from);
+-
+ static unsigned long icache_size, dcache_size;		/* Size in bytes */
+ static unsigned long icache_lsize, dcache_lsize;	/* Size in bytes */
+ 
+@@ -320,11 +317,10 @@
+ 
+ void __init ld_mmu_r23000(void)
+ {
++	extern void build_clear_page(void);
++	extern void build_copy_page(void);
+ 	unsigned long config;
+ 
+-	_clear_page = r3k_clear_page;
+-	_copy_page = r3k_copy_page;
+-
+ 	r3k_probe_cache();
+ 
+ 	_flush_cache_all = r3k_flush_cache_all;
+@@ -344,4 +340,7 @@
+ 		icache_size >> 10, icache_lsize);
+ 	printk("Primary data cache %ldkB, linesize %ld bytes.\n",
+ 		dcache_size >> 10, dcache_lsize);
++
++	build_clear_page();
++	build_copy_page();
+ }

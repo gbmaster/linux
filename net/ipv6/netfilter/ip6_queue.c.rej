@@ -1,0 +1,17 @@
+--- net/ipv6/netfilter/ip6_queue.c	2003-06-13 14:51:39.000000000 +0000
++++ net/ipv6/netfilter/ip6_queue.c	2004-01-06 12:43:29.000000000 +0000
+@@ -589,12 +589,11 @@
+ 	0
+ };
+ 
+-static int sysctl_maxlen = IPQ_QMAX_DEFAULT;
+ static struct ctl_table_header *ipq_sysctl_header;
+ 
+ static ctl_table ipq_table[] = {
+-	{ NET_IPQ_QMAX, NET_IPQ_QMAX_NAME, &sysctl_maxlen,
+-	  sizeof(sysctl_maxlen), 0644,  NULL, proc_dointvec },
++	{ NET_IPQ_QMAX, NET_IPQ_QMAX_NAME, &queue_maxlen,
++	  sizeof(queue_maxlen), 0644,  NULL, proc_dointvec },
+  	{ 0 }
+ };
+ 

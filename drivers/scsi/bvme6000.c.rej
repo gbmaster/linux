@@ -1,0 +1,12 @@
+--- drivers/scsi/bvme6000.c	2002-11-28 23:53:14.000000000 +0000
++++ drivers/scsi/bvme6000.c	2004-01-06 12:42:38.000000000 +0000
+@@ -23,9 +23,6 @@
+ 
+ #include<linux/stat.h>
+ 
+-extern int ncr53c7xx_init(Scsi_Host_Template *tpnt, int board, int chip,
+-			  u32 base, int io_port, int irq, int dma,
+-			  long long options, int clock);
+ 
+ int bvme6000_scsi_detect(Scsi_Host_Template *tpnt)
+ {

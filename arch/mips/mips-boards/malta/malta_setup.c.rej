@@ -1,0 +1,14 @@
+--- arch/mips/mips-boards/malta/malta_setup.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/mips-boards/malta/malta_setup.c	2004-01-06 12:46:43.000000000 +0000
+@@ -45,11 +45,6 @@
+ #include <linux/console.h>
+ #endif
+ 
+-#if defined(CONFIG_SERIAL_CONSOLE) || defined(CONFIG_PROM_CONSOLE)
+-extern void console_setup(char *, int *);
+-char serial_console[20];
+-#endif
+-
+ #ifdef CONFIG_KGDB
+ extern void rs_kgdb_hook(int);
+ int remote_debug = 0;

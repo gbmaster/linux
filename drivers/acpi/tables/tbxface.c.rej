@@ -1,0 +1,11 @@
+--- drivers/acpi/tables/tbxface.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/acpi/tables/tbxface.c	2004-01-06 12:46:08.000000000 +0000
+@@ -251,7 +251,7 @@
+ 	/* Find all tables of the requested type */
+ 
+ 	table_desc = acpi_gbl_table_lists[table_type].next;
+-	while (table_desc); {
++	while (table_desc) {
+ 		/*
+ 		 * Delete all namespace entries owned by this table.  Note that these
+ 		 * entries can appear anywhere in the namespace by virtue of the AML

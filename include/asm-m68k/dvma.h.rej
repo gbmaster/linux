@@ -1,0 +1,12 @@
+--- include/asm-m68k/dvma.h	2003-11-28 18:26:21.000000000 +0000
++++ include/asm-m68k/dvma.h	2004-01-06 12:45:02.000000000 +0000
+@@ -58,7 +58,8 @@
+ #define dvma_vtob(x) dvma_vtop(x)
+ #define dvma_btov(x) dvma_ptov(x)
+ 
+-extern inline int dvma_map_cpu(unsigned long kaddr, unsigned long vaddr, int len)
++static inline int dvma_map_cpu(unsigned long kaddr, unsigned long vaddr,
++			       int len)
+ {
+ 	return 0;
+ }

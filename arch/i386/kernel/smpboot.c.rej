@@ -1,0 +1,11 @@
+--- arch/i386/kernel/smpboot.c	2003-11-28 18:26:19.000000000 +0000
++++ arch/i386/kernel/smpboot.c	2004-01-06 12:44:27.000000000 +0000
+@@ -1106,7 +1106,7 @@
+ 	 */
+ 	Dprintk("CPU present map: %lx\n", phys_cpu_present_map);
+ 
+-	for (bit = 0; bit < NR_CPUS; bit++) {
++	for (bit = 0; bit < MAX_APICS; bit++) {
+ 		apicid = cpu_present_to_apicid(bit);
+ 		
+ 		/* don't try to boot BAD_APICID */

@@ -416,7 +416,7 @@ acpi_ev_delete_gpe_xrupt (
  *
  * RETURN:      Status
  *
- * DESCRIPTION: Install new GPE block with mutex support
+ * DESCRIPTION: Remove a GPE block
  *
  ******************************************************************************/
 

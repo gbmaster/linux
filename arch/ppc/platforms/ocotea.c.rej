@@ -1,0 +1,11 @@
+--- arch/ppc/platforms/ocotea.c	2003-11-28 18:26:19.000000000 +0000
++++ arch/ppc/platforms/ocotea.c	2004-01-06 12:43:12.000000000 +0000
+@@ -215,7 +215,7 @@
+ 	serial_req.baud_base = BASE_BAUD;
+ 	serial_req.port = 0;
+ 	serial_req.irq = 0;
+-	serial_req.flags = ASYNC_BOOT_AUTOCONF | ASYNC_SKIP_TEST;
++	serial_req.flags = ASYNC_BOOT_AUTOCONF;
+ 	serial_req.io_type = SERIAL_IO_MEM;
+ 	serial_req.iomem_base = ioremap64(PPC440GX_UART0_ADDR, 8);
+ 	serial_req.iomem_reg_shift = 0;

@@ -1,0 +1,38 @@
+--- fs/stat.c	2003-08-25 11:44:43.000000000 +0000
++++ fs/stat.c	2004-01-06 12:42:58.000000000 +0000
+@@ -26,7 +26,7 @@
+ }
+ 
+ 
+-#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__)
++#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__) && !defined(__mips__)
+ 
+ /*
+  * For backward compatibility?  Maybe this should be moved
+@@ -129,7 +129,7 @@
+ }
+ 
+ 
+-#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__)
++#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__) && !defined(__mips__)
+ /*
+  * For backward compatibility?  Maybe this should be moved
+  * into arch/i386 instead?
+@@ -165,7 +165,7 @@
+ 	return error;
+ }
+ 
+-#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__)
++#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__) && !defined(__mips__)
+ 
+ /*
+  * For backward compatibility?  Maybe this should be moved
+@@ -203,7 +203,7 @@
+ 	return error;
+ }
+ 
+-#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__)
++#if !defined(__alpha__) && !defined(__sparc__) && !defined(__ia64__) && !defined(CONFIG_ARCH_S390) && !defined(__hppa__) && !defined(__x86_64__) && !defined(__mips__)
+ 
+ /*
+  * For backward compatibility?  Maybe this should be moved

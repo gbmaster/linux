@@ -1,0 +1,10 @@
+--- drivers/usb/serial/visor.h	2003-11-28 18:26:20.000000000 +0000
++++ drivers/usb/serial/visor.h	2004-01-06 12:43:26.000000000 +0000
+@@ -41,6 +41,7 @@
+ #define SONY_CLIE_4_1_ID		0x009A
+ #define SONY_CLIE_NX60_ID		0x00DA
+ #define SONY_CLIE_NZ90V_ID		0x00E9
++#define SONY_CLIE_UX50_ID		0x0144
+ 
+ #define SAMSUNG_VENDOR_ID		0x04E8
+ #define SAMSUNG_SCH_I330_ID		0x8001

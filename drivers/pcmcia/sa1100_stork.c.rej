@@ -1,0 +1,10 @@
+--- drivers/pcmcia/sa1100_stork.c	2002-08-03 00:39:44.000000000 +0000
++++ drivers/pcmcia/sa1100_stork.c	2004-01-06 12:44:39.000000000 +0000
+@@ -24,7 +24,6 @@
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/sched.h>
+-#include <linux/i2c.h>
+ 
+ #include <asm/hardware.h>
+ #include <asm/irq.h>

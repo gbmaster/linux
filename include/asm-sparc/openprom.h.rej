@@ -1,0 +1,11 @@
+--- include/asm-sparc/openprom.h	2000-06-20 00:59:39.000000000 +0000
++++ include/asm-sparc/openprom.h	2004-01-06 12:42:56.000000000 +0000
+@@ -169,6 +169,8 @@
+ 	int (*v3_cpuresume)(unsigned int whichcpu);
+ };
+ 
++extern struct linux_romvec *romvec;
++
+ /* Routines for traversing the prom device tree. */
+ struct linux_nodeops {
+ 	int (*no_nextnode)(int node);

@@ -1,0 +1,11 @@
+--- arch/mips/vr41xx/nec-eagle/setup.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/vr41xx/nec-eagle/setup.c	2004-01-06 12:46:03.000000000 +0000
+@@ -140,7 +140,7 @@
+ 
+ 	vr41xx_bcu_init();
+ 
+-	vr41xx_cmu_init(0);
++	vr41xx_cmu_init();
+ 
+ #ifdef CONFIG_SERIAL
+ 	vr41xx_dsiu_init();

@@ -1,0 +1,13 @@
+--- include/linux/lvm.h	2003-11-28 18:26:21.000000000 +0000
++++ include/linux/lvm.h	2004-01-06 12:42:18.000000000 +0000
+@@ -80,8 +80,8 @@
+ #ifndef _LVM_H_INCLUDE
+ #define _LVM_H_INCLUDE
+ 
+-#define LVM_RELEASE_NAME "1.0.7"
+-#define LVM_RELEASE_DATE "28/03/2003"
++#define LVM_RELEASE_NAME "1.0.8"
++#define LVM_RELEASE_DATE "17/11/2003"
+ 
+ #define	_LVM_KERNEL_H_VERSION	"LVM "LVM_RELEASE_NAME" ("LVM_RELEASE_DATE")"
+ 

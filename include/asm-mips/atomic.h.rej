@@ -1,0 +1,74 @@
+--- include/asm-mips/atomic.h	2003-08-25 11:44:43.000000000 +0000
++++ include/asm-mips/atomic.h	2004-01-06 12:41:59.000000000 +0000
+@@ -55,7 +55,7 @@
+  * Atomically adds @i to @v.  Note that the guaranteed useful range
+  * of an atomic_t is only 24 bits.
+  */
+-extern __inline__ void atomic_add(int i, atomic_t * v)
++static __inline__ void atomic_add(int i, atomic_t * v)
+ {
+ 	unsigned long flags;
+ 
+@@ -72,7 +72,7 @@
+  * Atomically subtracts @i from @v.  Note that the guaranteed
+  * useful range of an atomic_t is only 24 bits.
+  */
+-extern __inline__ void atomic_sub(int i, atomic_t * v)
++static __inline__ void atomic_sub(int i, atomic_t * v)
+ {
+ 	unsigned long flags;
+ 
+@@ -81,7 +81,7 @@
+ 	local_irq_restore(flags);
+ }
+ 
+-extern __inline__ int atomic_add_return(int i, atomic_t * v)
++static __inline__ int atomic_add_return(int i, atomic_t * v)
+ {
+ 	unsigned long flags;
+ 	int temp;
+@@ -95,7 +95,7 @@
+ 	return temp;
+ }
+ 
+-extern __inline__ int atomic_sub_return(int i, atomic_t * v)
++static __inline__ int atomic_sub_return(int i, atomic_t * v)
+ {
+ 	unsigned long flags;
+ 	int temp;
+@@ -124,7 +124,7 @@
+  * Atomically adds @i to @v.  Note that the guaranteed useful range
+  * of an atomic_t is only 24 bits.
+  */
+-extern __inline__ void atomic_add(int i, atomic_t * v)
++static __inline__ void atomic_add(int i, atomic_t * v)
+ {
+ 	unsigned long temp;
+ 
+@@ -145,7 +145,7 @@
+  * Atomically subtracts @i from @v.  Note that the guaranteed
+  * useful range of an atomic_t is only 24 bits.
+  */
+-extern __inline__ void atomic_sub(int i, atomic_t * v)
++static __inline__ void atomic_sub(int i, atomic_t * v)
+ {
+ 	unsigned long temp;
+ 
+@@ -161,7 +161,7 @@
+ /*
+  * Same as above, but return the result value
+  */
+-extern __inline__ int atomic_add_return(int i, atomic_t * v)
++static __inline__ int atomic_add_return(int i, atomic_t * v)
+ {
+ 	unsigned long temp, result;
+ 
+@@ -182,7 +182,7 @@
+ 	return result;
+ }
+ 
+-extern __inline__ int atomic_sub_return(int i, atomic_t * v)
++static __inline__ int atomic_sub_return(int i, atomic_t * v)
+ {
+ 	unsigned long temp, result;
+ 

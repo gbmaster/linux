@@ -1,0 +1,10 @@
+--- drivers/net/wan/hdlc_raw.c	2003-11-28 18:26:20.000000000 +0000
++++ drivers/net/wan/hdlc_raw.c	2004-01-06 12:42:33.000000000 +0000
+@@ -9,7 +9,6 @@
+  * as published by the Free Software Foundation.
+  */
+ 
+-#include <linux/config.h>
+ #include <linux/module.h>
+ #include <linux/kernel.h>
+ #include <linux/slab.h>

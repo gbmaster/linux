@@ -1,0 +1,10 @@
+--- drivers/net/starfire.c	2003-11-28 18:26:20.000000000 +0000
++++ drivers/net/starfire.c	2004-01-06 12:43:17.000000000 +0000
+@@ -130,7 +130,6 @@
+ #include <linux/config.h>
+ #include <linux/version.h>
+ #include <linux/module.h>
+-#include <asm/io.h>
+ #include <linux/kernel.h>
+ #include <linux/pci.h>
+ #include <linux/netdevice.h>

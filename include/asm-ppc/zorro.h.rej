@@ -1,0 +1,8 @@
+--- include/asm-ppc/zorro.h	2002-08-03 00:39:45.000000000 +0000
++++ include/asm-ppc/zorro.h	2004-01-06 12:44:35.000000000 +0000
+@@ -27,4 +27,4 @@
+ #define z_ioremap ioremap
+ #define z_iounmap iounmap
+ 
+-#endif /* _ASM_ZORRO_H */
++#endif /* _ASM_PPC_ZORRO_H */

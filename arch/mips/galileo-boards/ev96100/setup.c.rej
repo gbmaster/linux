@@ -1,0 +1,14 @@
+--- arch/mips/galileo-boards/ev96100/setup.c	2003-08-25 11:44:39.000000000 +0000
++++ arch/mips/galileo-boards/ev96100/setup.c	2004-01-06 12:46:27.000000000 +0000
+@@ -50,11 +50,6 @@
+ #include <asm/galileo-boards/ev96100int.h>
+ 
+ 
+-#if defined(CONFIG_SERIAL_CONSOLE) || defined(CONFIG_PROM_CONSOLE)
+-extern void console_setup(char *, int *);
+-char serial_console[20];
+-#endif
+-
+ extern char * __init prom_getcmdline(void);
+ 
+ extern void mips_reboot_setup(void);

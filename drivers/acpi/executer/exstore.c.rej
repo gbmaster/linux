@@ -1,0 +1,12 @@
+--- drivers/acpi/executer/exstore.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/acpi/executer/exstore.c	2004-01-06 12:44:08.000000000 +0000
+@@ -190,8 +190,7 @@
+ 		case ACPI_TYPE_INTEGER:
+ 
+ 			ACPI_DEBUG_PRINT_RAW ((ACPI_DB_DEBUG_OBJECT, "%8.8X%8.8X\n",
+-					ACPI_HIDWORD (source_desc->integer.value),
+-					ACPI_LODWORD (source_desc->integer.value)));
++					ACPI_FORMAT_UINT64 (source_desc->integer.value)));
+ 			break;
+ 
+ 

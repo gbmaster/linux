@@ -1,0 +1,11 @@
+--- arch/ppc/platforms/spruce.h	2003-08-25 11:44:40.000000000 +0000
++++ arch/ppc/platforms/spruce.h	2004-01-06 12:44:53.000000000 +0000
+@@ -70,7 +70,7 @@
+ 
+ #define STD_UART_OP(num)					\
+ 	{ 0, BASE_BAUD, 0, UART##num##_INT,			\
+-		(ASYNC_BOOT_AUTOCONF | ASYNC_SKIP_TEST),	\
++		ASYNC_BOOT_AUTOCONF,				\
+ 		iomem_base: UART##num##_IO_BASE,		\
+ 		io_type: SERIAL_IO_MEM},
+ 

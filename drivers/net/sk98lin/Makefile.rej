@@ -1,0 +1,11 @@
+--- drivers/net/sk98lin/Makefile	2003-11-28 18:26:20.000000000 +0000
++++ drivers/net/sk98lin/Makefile	2004-01-06 12:41:53.000000000 +0000
+@@ -78,7 +78,7 @@
+ # SK_DBGCAT_DRV_INT_SRC         0x04000000      interrupts sources
+ # SK_DBGCAT_DRV_EVENT           0x08000000      driver events
+ 
+-EXTRA_CFLAGS += -I. -DSK_USE_CSUM -DGENESIS -DYUKON $(DBGDEF) $(SKPARAM)
++EXTRA_CFLAGS += -I. -DSK_DIAG_SUPPORT -DSK_USE_CSUM -DGENESIS -DYUKON $(DBGDEF) $(SKPARAM)
+ 
+ include $(TOPDIR)/Rules.make
+ 

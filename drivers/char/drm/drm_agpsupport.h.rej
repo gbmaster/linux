@@ -1,0 +1,11 @@
+--- drivers/char/drm/drm_agpsupport.h	2003-11-28 18:26:20.000000000 +0000
++++ drivers/char/drm/drm_agpsupport.h	2004-01-06 12:41:56.000000000 +0000
+@@ -79,7 +79,7 @@
+ 		return -EBUSY;
+ 	if(!drm_agp->acquire)
+ 		return -EINVAL;
+-	if (retcode = drm_agp->acquire())
++	if ((retcode = drm_agp->acquire()))
+ 		return retcode;
+ 	dev->agp->acquired = 1;
+ 	return 0;

@@ -1,0 +1,17 @@
+--- drivers/macintosh/via-macii.c	2002-08-03 00:39:44.000000000 +0000
++++ drivers/macintosh/via-macii.c	2004-01-06 12:45:12.000000000 +0000
+@@ -21,13 +21,13 @@
+ #include <linux/delay.h>
+ #include <linux/sched.h>
+ #include <linux/adb.h>
++#include <linux/init.h>
+ #include <asm/macintosh.h>
+ #include <asm/macints.h>
+ #include <asm/machw.h>
+ #include <asm/mac_via.h>
+ #include <asm/io.h>
+ #include <asm/system.h>
+-#include <asm/init.h>
+ 
+ static volatile unsigned char *via;
+ 

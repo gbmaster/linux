@@ -1,0 +1,10 @@
+--- drivers/net/Makefile.lib	2003-08-25 11:44:42.000000000 +0000
++++ drivers/net/Makefile.lib	2004-01-06 12:44:34.000000000 +0000
+@@ -34,6 +34,7 @@
+ obj-$(CONFIG_VIA_RHINE)		+= crc32.o
+ obj-$(CONFIG_WINBOND_840)	+= crc32.o
+ obj-$(CONFIG_YELLOWFIN)		+= crc32.o
++obj-$(CONFIG_NATSEMI)		+= crc32.o
+ 
+ # These rely on drivers/net/7990.o which requires crc32.o
+ obj-$(CONFIG_HPLANCE)		+= crc32.o	

@@ -1,0 +1,10 @@
+--- drivers/block/cciss_cmd.h	2003-06-13 14:51:32.000000000 +0000
++++ drivers/block/cciss_cmd.h	2004-01-06 12:42:57.000000000 +0000
+@@ -266,6 +266,7 @@
+   DWORD            Reserved; 
+   BYTE             ServerName[16];
+   DWORD            HeartBeat;
++  DWORD            SCSI_Prefetch;
+ } CfgTable_struct;
+ #pragma pack()	 
+ #endif /* CCISS_CMD_H */

@@ -1,0 +1,10 @@
+--- drivers/video/Makefile	2003-08-25 11:44:42.000000000 +0000
++++ drivers/video/Makefile	2004-01-06 12:42:39.000000000 +0000
+@@ -81,6 +81,7 @@
+ obj-$(CONFIG_FB_CGFOURTEEN)       += cgfourteenfb.o sbusfb.o
+ obj-$(CONFIG_FB_P9100)            += p9100fb.o sbusfb.o
+ obj-$(CONFIG_FB_LEO)              += leofb.o sbusfb.o
++obj-$(CONFIG_FB_PMAG_AA)          += pmag-aa-fb.o
+ obj-$(CONFIG_FB_PMAG_BA)          += pmag-ba-fb.o
+ obj-$(CONFIG_FB_PMAGB_B)          += pmagb-b-fb.o
+ obj-$(CONFIG_FB_MAXINE)           += maxinefb.o

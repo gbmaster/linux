@@ -1,0 +1,21 @@
+--- drivers/ide/legacy/buddha.c	2003-06-13 14:51:33.000000000 +0000
++++ drivers/ide/legacy/buddha.c	2004-01-06 12:44:03.000000000 +0000
+@@ -146,6 +146,7 @@
+ void __init buddha_init(void)
+ {
+ 	hw_regs_t hw;
++	ide_hwif_t *hwif;
+ 	int i, index;
+ 
+ 	struct zorro_dev *z = NULL;
+@@ -212,8 +213,9 @@
+ 						IRQ_AMIGA_PORTS);
+ 			}	
+ 			
+-			index = ide_register_hw(&hw, NULL);
++			index = ide_register_hw(&hw, &hwif);
+ 			if (index != -1) {
++				hwif->mmio = 2;
+ 				printk("ide%d: ", index);
+ 				switch(type) {
+ 				case BOARD_BUDDHA:

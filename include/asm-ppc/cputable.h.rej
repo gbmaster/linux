@@ -1,0 +1,11 @@
+--- include/asm-ppc/cputable.h	2003-06-13 14:51:38.000000000 +0000
++++ include/asm-ppc/cputable.h	2004-01-06 12:44:08.000000000 +0000
+@@ -72,7 +72,7 @@
+ #define CPU_FTR_L3CR			0x00000800
+ #define CPU_FTR_L3_DISABLE_NAP		0x00001000
+ #define CPU_FTR_NAP_DISABLE_L2_PR	0x00002000
+-#define CPU_FTR_DUAL_PLL_750FX		0x00004000
++#define CPU_FTR_750FX			0x00004000
+ #define CPU_FTR_NO_DPM			0x00008000
+ #define CPU_FTR_HAS_HIGH_BATS		0x00010000
+ 

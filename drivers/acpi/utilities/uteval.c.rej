@@ -1,0 +1,20 @@
+--- drivers/acpi/utilities/uteval.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/acpi/utilities/uteval.c	2004-01-06 12:42:29.000000000 +0000
+@@ -91,7 +91,7 @@
+ 	if (ACPI_FAILURE (status)) {
+ 		if (status == AE_NOT_FOUND) {
+ 			ACPI_DEBUG_PRINT ((ACPI_DB_EXEC, "[%4.4s.%s] was not found\n",
+-				prefix_node->name.ascii, path));
++				acpi_ut_get_node_name (prefix_node), path));
+ 		}
+ 		else {
+ 			ACPI_REPORT_METHOD_ERROR ("Method execution failed",
+@@ -544,7 +544,7 @@
+ 		if (AE_NOT_FOUND == status) {
+ 			ACPI_DEBUG_PRINT ((ACPI_DB_EXEC,
+ 				"_STA on %4.4s was not found, assuming device is present\n",
+-				device_node->name.ascii));
++				acpi_ut_get_node_name (device_node)));
+ 
+ 			*flags = 0x0F;
+ 			status = AE_OK;

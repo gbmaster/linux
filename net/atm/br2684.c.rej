@@ -1,0 +1,40 @@
+--- net/atm/br2684.c	2003-11-28 18:26:21.000000000 +0000
++++ net/atm/br2684.c	2004-01-06 12:46:45.000000000 +0000
+@@ -678,6 +678,7 @@
+ 	return -ENOIOCTLCMD;
+ }
+ 
++#ifdef CONFIG_PROC_FS
+ /* Never put more than 256 bytes in at once */
+ static int br2684_proc_engine(loff_t pos, char *buf)
+ {
+@@ -770,16 +771,19 @@
+ };
+ 
+ extern struct proc_dir_entry *atm_proc_root;	/* from proc.c */
++#endif /* CONFIG_PROC_FS */
+ 
+ /* the following avoids some spurious warnings from the compiler */
+ #define UNUSED __attribute__((unused))
+ 
+ static int __init UNUSED br2684_init(void)
+ {
++#ifdef CONFIG_PROC_FS
+ 	struct proc_dir_entry *p;
+ 	if ((p = create_proc_entry("br2684", 0, atm_proc_root)) == NULL)
+ 		return -ENOMEM;
+ 	p->proc_fops = &br2684_proc_operations;
++#endif /* CONFIG_PROC_FS */
+ 	br2684_ioctl_set(br2684_ioctl);
+ 	return 0;
+ }
+@@ -788,7 +792,9 @@
+ {
+ 	struct br2684_dev *brdev;
+ 	br2684_ioctl_set(NULL);
++#ifdef CONFIG_PROC_FS
+ 	remove_proc_entry("br2684", atm_proc_root);
++#endif /* CONFIG_PROC_FS */
+ 	while (!list_empty(&br2684_devs)) {
+ 		brdev = list_entry_brdev(br2684_devs.next);
+ 		unregister_netdev(&brdev->net_dev);

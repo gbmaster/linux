@@ -1,0 +1,17 @@
+--- include/asm-mips/sibyte/64bit.h	2003-08-25 11:44:44.000000000 +0000
++++ include/asm-mips/sibyte/64bit.h	2004-01-06 12:44:50.000000000 +0000
+@@ -93,12 +93,12 @@
+  * These are provided so as to be able to use common
+  * driver code for the 32-bit and 64-bit trees
+  */
+-extern inline void out64(u64 val, unsigned long addr)
++static inline void out64(u64 val, unsigned long addr)
+ {
+ 	*(volatile unsigned long *)addr = val;
+ }
+ 
+-extern inline u64 in64(unsigned long addr)
++static inline u64 in64(unsigned long addr)
+ {
+ 	return *(volatile unsigned long *)addr;
+ }

@@ -1,0 +1,8 @@
+--- arch/i386/kernel/i386_ksyms.c	2003-11-28 18:26:19.000000000 +0000
++++ arch/i386/kernel/i386_ksyms.c	2004-01-06 12:44:23.000000000 +0000
+@@ -185,4 +185,5 @@
+ #ifdef CONFIG_EDD_MODULE
+ EXPORT_SYMBOL(edd);
+ EXPORT_SYMBOL(eddnr);
++EXPORT_SYMBOL(edd_disk80_sig);
+ #endif

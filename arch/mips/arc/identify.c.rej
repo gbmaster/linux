@@ -1,0 +1,23 @@
+--- arch/mips/arc/identify.c	2003-08-25 11:44:39.000000000 +0000
++++ arch/mips/arc/identify.c	2004-01-06 12:43:04.000000000 +0000
+@@ -44,11 +44,6 @@
+ 		MACH_GROUP_SGI,
+ 		MACH_SGI_IP28,
+ 		PROM_FLAG_ARCS
+-	}, {	"SGI-IP32",
+-		"SGI IP32",
+-		MACH_GROUP_SGI,
+-		MACH_SGI_IP32,
+-		PROM_FLAG_ARCS
+ 	}, {	"Microsoft-Jazz",
+ 		"Jazz MIPS_Magnum_4000",
+ 		MACH_GROUP_JAZZ,
+@@ -63,7 +58,7 @@
+ 		"SNI RM200_PCI",
+ 		MACH_GROUP_SNI_RM,
+ 		MACH_SNI_RM200_PCI,
+-		0
++		PROM_FLAG_DONT_FREE_TEMP
+ 	}
+ };
+ 

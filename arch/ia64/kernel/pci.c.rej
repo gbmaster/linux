@@ -1,0 +1,11 @@
+--- arch/ia64/kernel/pci.c	2003-11-28 18:26:19.000000000 +0000
++++ arch/ia64/kernel/pci.c	2004-01-06 12:44:14.000000000 +0000
+@@ -523,8 +523,6 @@
+ 	if (ret < 0)
+ 		return ret;
+ 
+- 	platform_pci_enable_device(dev);
+-
+ 	printk(KERN_INFO "PCI: Found IRQ %d for device %s\n", dev->irq, dev->slot_name);
+ 
+ 	return 0;

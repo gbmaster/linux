@@ -1,0 +1,11 @@
+--- include/asm-mips/bitops.h	2003-08-25 11:44:43.000000000 +0000
++++ include/asm-mips/bitops.h	2004-01-06 12:42:32.000000000 +0000
+@@ -658,6 +658,8 @@
+ 
+ found_first:
+ 	tmp |= ~0UL << size;
++	if (tmp == ~0UL)		/* Are any bits zero? */
++		return result + size;	/* Nope. */
+ found_middle:
+ 	return result + ffz(tmp);
+ }

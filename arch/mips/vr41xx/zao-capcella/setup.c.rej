@@ -1,0 +1,11 @@
+--- arch/mips/vr41xx/zao-capcella/setup.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/vr41xx/zao-capcella/setup.c	2004-01-06 12:46:18.000000000 +0000
+@@ -107,7 +107,7 @@
+ 
+ 	vr41xx_bcu_init();
+ 
+-	vr41xx_cmu_init(0x0102);
++	vr41xx_cmu_init();
+ 
+ 	vr41xx_siu_init(SIU_RS232C, 0);
+ 	vr41xx_dsiu_init();

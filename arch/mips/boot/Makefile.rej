@@ -1,0 +1,34 @@
+--- arch/mips/boot/Makefile	2002-11-28 23:53:09.000000000 +0000
++++ arch/mips/boot/Makefile	2004-01-06 12:45:42.000000000 +0000
+@@ -24,7 +24,7 @@
+ drop-sections	= .reginfo .mdebug
+ strip-flags	= $(addprefix --remove-section=,$(drop-sections))
+ 
+-all: vmlinux.ecoff addinitrd
++all: vmlinux.ecoff vmlinux.srec addinitrd
+ 
+ vmlinux.ecoff:	$(CONFIGURE) elf2ecoff $(TOPDIR)/vmlinux
+ 	./elf2ecoff $(TOPDIR)/vmlinux vmlinux.ecoff $(E2EFLAGS)
+@@ -32,6 +32,9 @@
+ elf2ecoff: elf2ecoff.c
+ 	$(HOSTCC) -o $@ $^
+ 
++vmlinux.srec: $(CONFIGURE) $(TOPDIR)/vmlinux
++	$(OBJCOPY) -S -O srec $(strip-flags) $(TOPDIR)/vmlinux vmlinux.srec
++
+ addinitrd: addinitrd.c
+ 	$(HOSTCC) -o $@ $^
+ 
+@@ -40,10 +43,12 @@
+ 
+ clean:
+ 	rm -f vmlinux.ecoff
++	rm -f vmlinux.srec
+ 	rm -f zImage zImage.tmp
+ 
+ mrproper:
+ 	rm -f vmlinux.ecoff
++	rm -f vmlinux.srec
+ 	rm -f addinitrd
+ 	rm -f elf2ecoff
+ 

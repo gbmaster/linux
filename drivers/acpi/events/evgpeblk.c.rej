@@ -1,0 +1,12 @@
+--- drivers/acpi/events/evgpeblk.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/acpi/events/evgpeblk.c	2004-01-06 12:42:56.000000000 +0000
+@@ -743,8 +743,7 @@
+ 				((gpe_block->register_count * ACPI_GPE_REGISTER_WIDTH) -1)),
+ 		gpe_device->name.ascii,
+ 		gpe_block->register_count,
+-		ACPI_HIDWORD (gpe_block->block_address.address),
+-		ACPI_LODWORD (gpe_block->block_address.address),
++		ACPI_FORMAT_UINT64 (gpe_block->block_address.address),
+ 		interrupt_level));
+ 
+ 	/* Find all GPE methods (_Lxx, _Exx) for this block */

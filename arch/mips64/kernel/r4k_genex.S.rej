@@ -1,0 +1,10 @@
+--- arch/mips64/kernel/r4k_genex.S	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips64/kernel/r4k_genex.S	2004-01-06 12:45:04.000000000 +0000
+@@ -17,6 +17,7 @@
+ #include <asm/stackframe.h>
+ #include <asm/exception.h>
+ #include <asm/cacheops.h>
++#include <asm/war.h>
+ 
+ 	BUILD_HANDLER adel ade ade silent		/* #4  */
+ 	BUILD_HANDLER ades ade ade silent		/* #5  */

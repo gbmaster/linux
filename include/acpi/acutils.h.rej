@@ -1,0 +1,17 @@
+--- include/acpi/acutils.h	2003-08-25 11:44:43.000000000 +0000
++++ include/acpi/acutils.h	2004-01-06 12:42:07.000000000 +0000
+@@ -125,6 +125,14 @@
+ 	acpi_object_type                type);
+ 
+ char *
++acpi_ut_get_node_name (
++	void                            *object);
++
++char *
++acpi_ut_get_descriptor_name (
++	void                            *object);
++
++char *
+ acpi_ut_get_object_type_name (
+ 	union acpi_operand_object       *obj_desc);
+ 

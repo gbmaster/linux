@@ -1,0 +1,13 @@
+--- arch/mips/ddb5xxx/ddb5074/setup.c	2003-08-25 11:44:39.000000000 +0000
++++ arch/mips/ddb5xxx/ddb5074/setup.c	2004-01-06 12:42:33.000000000 +0000
+@@ -36,10 +36,6 @@
+ extern void breakpoint(void);
+ #endif
+ 
+-#if defined(CONFIG_SERIAL_CONSOLE)
+-extern void console_setup(char *);
+-#endif
+-
+ extern struct ide_ops std_ide_ops;
+ extern struct kbd_ops std_kbd_ops;
+ extern struct rtc_ops ddb_rtc_ops;

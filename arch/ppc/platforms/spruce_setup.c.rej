@@ -1,0 +1,11 @@
+--- arch/ppc/platforms/spruce_setup.c	2003-06-13 14:51:31.000000000 +0000
++++ arch/ppc/platforms/spruce_setup.c	2004-01-06 12:46:04.000000000 +0000
+@@ -132,7 +132,7 @@
+ 	serial_req.line = 0;
+ 	serial_req.port = 0;
+ 	serial_req.irq = 3;
+-	serial_req.flags = ASYNC_BOOT_AUTOCONF | ASYNC_SKIP_TEST;
++	serial_req.flags = ASYNC_BOOT_AUTOCONF;
+ 	serial_req.io_type = SERIAL_IO_MEM;
+ 	serial_req.iomem_base = (u_char *)UART0_IO_BASE;
+ 	serial_req.iomem_reg_shift = 0;

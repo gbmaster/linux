@@ -1,0 +1,11 @@
+--- net/sched/sch_csz.c	2003-08-25 11:44:44.000000000 +0000
++++ net/sched/sch_csz.c	2004-01-06 12:44:53.000000000 +0000
+@@ -752,7 +752,7 @@
+ 
+ 	while ((tp = q->filter_list) != NULL) {
+ 		q->filter_list = tp->next;
+-		tp->ops->destroy(tp);
++		tcf_destroy(tp);
+ 	}
+ 
+ 	MOD_DEC_USE_COUNT;

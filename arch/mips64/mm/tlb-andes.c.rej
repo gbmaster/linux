@@ -1,0 +1,11 @@
+--- arch/mips64/mm/tlb-andes.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips64/mm/tlb-andes.c	2004-01-06 12:42:18.000000000 +0000
+@@ -192,7 +192,7 @@
+ 	 *   - The entire mm handling assumes the c0_pagemask register to
+ 	 *     be set for 4kb pages.
+ 	 */
+-	write_c0_pagemask(PM_4K);
++	write_c0_pagemask(PM_DEFAULT_MASK);
+ 	write_c0_wired(0);
+ 	write_c0_framemask(0);
+ 

@@ -1,0 +1,84 @@
+--- arch/mips/Makefile	2003-08-25 11:44:39.000000000 +0000
++++ arch/mips/Makefile	2004-01-06 12:42:10.000000000 +0000
+@@ -44,10 +44,11 @@
+ GCCFLAGS	:= -I $(TOPDIR)/include/asm/gcc
+ GCCFLAGS	+= -G 0 -mno-abicalls -fno-pic -pipe
+ GCCFLAGS	+= $(call check_gcc, -mabi=32,)
++GCCFLAGS	+= $(call check_gcc, -finline-limit=100000,)
+ LINKFLAGS	+= -G 0 -static # -N
+ MODFLAGS	+= -mlong-calls
+ 
+-ifdef CONFIG_KGDB
++ifdef CONFIG_DEBUG_INFO
+ GCCFLAGS	+= -g
+ ifdef CONFIG_SB1XXX_CORELIS
+ GCCFLAGS	+= -mno-sched-prolog -fno-omit-frame-pointer
+@@ -97,6 +98,10 @@
+ GCCFLAGS	+= $(call check_gcc, -march=rm7000, -mcpu=r5000) \
+ 		   -mips2 -Wa,--trap
+ endif
++ifdef CONFIG_CPU_RM9000
++GCCFLAGS	+= $(call check_gcc, -march=rm9000, -mcpu=r5000) \
++		   -mips2 -Wa,--trap
++endif
+ ifdef CONFIG_CPU_SB1
+ GCCFLAGS	+= $(call check_gcc, -mcpu=sb1, -mcpu=r5000) \
+ 		   -mips2 -Wa,--trap
+@@ -195,6 +200,13 @@
+ LOADADDR      += 0x80100000
+ endif
+ 
++ifdef CONFIG_MIPS_HYDROGEN3
++LIBS          += arch/mips/au1000/hydrogen3/hydrogen3.o \
++                 arch/mips/au1000/common/au1000.o
++SUBDIRS       += arch/mips/au1000/hydrogen3 arch/mips/au1000/common
++LOADADDR      += 0x80100000
++endif
++
+ ifdef CONFIG_MIPS_BOSPORUS
+ LIBS          += arch/mips/au1000/db1x00/db1x00.o \
+                  arch/mips/au1000/common/au1000.o
+@@ -223,6 +235,16 @@
+ LOADADDR      += 0x80100000
+ endif
+ 
++#
++# Cogent CSB250
++#
++ifdef CONFIG_COGENT_CSB250
++LIBS		+= arch/mips/au1000/csb250/csb250.o \
++		   arch/mips/au1000/common/au1000.o
++SUBDIRS		+= arch/mips/au1000/csb250 arch/mips/au1000/common
++LOADADDR	:= 0x80100000
++endif
++
+ ifdef CONFIG_PCI
+ CORE_FILES    += arch/mips/pci/pci-core.o
+ SUBDIRS       += arch/mips/pci
+@@ -377,6 +399,16 @@
+ LOADADDR	:= 0x80100000
+ endif
+ 
++ifdef CONFIG_MOMENCO_JAGUAR_ATX
++LIBS		+= arch/mips/momentum/jaguar_atx/jaguar_atx.o
++SUBDIRS		+= arch/mips/momentum/jaguar_atx
++ifdef CONFIG_JAGUAR_DMALOW
++LOADADDR	:= 0x88000000
++else
++LOADADDR	:= 0x80100000
++endif
++endif
++
+ #
+ # NEC DDB Vrc-5074
+ #
+@@ -632,6 +664,9 @@
+ vmlinux.ecoff: vmlinux
+ 	@$(MAKEBOOT) $@
+ 
++vmlinux.srec: vmlinux
++	@$(MAKEBOOT) $@
++
+ archclean:
+ 	@$(MAKEBOOT) clean
+ 	rm -f arch/$(ARCH)/ld.script

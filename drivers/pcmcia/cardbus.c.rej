@@ -1,0 +1,19 @@
+--- drivers/pcmcia/cardbus.c	2003-06-13 14:51:35.000000000 +0000
++++ drivers/pcmcia/cardbus.c	2004-01-06 12:43:19.000000000 +0000
+@@ -223,7 +223,6 @@
+ 
+ struct pci_dev *cb_scan_slot(struct pci_dev *temp, struct list_head *list)
+ {
+-	struct pci_bus *bus = temp->bus;
+ 	struct pci_dev *dev;
+ 	struct pci_dev *first_dev = NULL;
+ 	int func = 0;
+@@ -369,7 +368,7 @@
+ 	return max;
+ }
+ 
+-static int program_bridge(struct pci_dev *bridge)
++static void program_bridge(struct pci_dev *bridge)
+ {
+ 	u32 l;
+ 	

@@ -1,0 +1,11 @@
+--- arch/ppc/mm/pgtable.c	2003-11-28 18:26:19.000000000 +0000
++++ arch/ppc/mm/pgtable.c	2004-01-06 12:42:59.000000000 +0000
+@@ -258,7 +258,7 @@
+ 
+ 	printk(KERN_INFO "Memory BAT mapping: BAT2=%ldMb, BAT3=%ldMb,"
+ 			" residual: %ldMb\n", __bat2 >> 20, __bat3 >> 20,
+-			(total_lowmem - (__bat2 - __bat3)) >> 20);
++			(total_lowmem - (__bat2 + __bat3)) >> 20);
+ 
+ 	/* On SMP, we limit the lowmem to the area mapped with BATs.
+ 	 * We also assume nobody will do SMP with 601s

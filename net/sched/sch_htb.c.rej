@@ -1,0 +1,11 @@
+--- net/sched/sch_htb.c	2003-11-28 18:26:21.000000000 +0000
++++ net/sched/sch_htb.c	2004-01-06 12:42:08.000000000 +0000
+@@ -1348,7 +1348,7 @@
+ 
+ 	while ((tp = *fl) != NULL) {
+ 		*fl = tp->next;
+-		tp->ops->destroy(tp);
++		tcf_destroy(tp);
+ 	}
+ }
+ 

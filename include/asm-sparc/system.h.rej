@@ -1,0 +1,20 @@
+--- include/asm-sparc/system.h	2003-11-28 18:26:21.000000000 +0000
++++ include/asm-sparc/system.h	2004-01-06 12:45:27.000000000 +0000
+@@ -10,7 +10,6 @@
+ 
+ #ifdef __KERNEL__
+ #include <asm/page.h>
+-#include <asm/oplib.h>
+ #include <asm/psr.h>
+ #include <asm/ptrace.h>
+ #include <asm/btfixup.h>
+@@ -52,9 +51,6 @@
+ extern unsigned long empty_bad_page_table;
+ extern unsigned long empty_zero_page;
+ 
+-extern struct linux_romvec *romvec;
+-#define halt() romvec->pv_halt()
+-
+ /* When a context switch happens we must flush all user windows so that
+  * the windows of the current process are flushed onto its stack. This
+  * way the windows are all clean for the next process and the stack

@@ -179,6 +179,10 @@ static struct pci_device_id tg3_pci_tbl[] = {
 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
 	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5705F,
 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
+	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5704S_2,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
+	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5705F,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
 	{ PCI_VENDOR_ID_SYSKONNECT, PCI_DEVICE_ID_SYSKONNECT_9DXX,
 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
 	{ PCI_VENDOR_ID_SYSKONNECT, PCI_DEVICE_ID_SYSKONNECT_9MXX,
@@ -4721,6 +4725,17 @@ static int tg3_reset_hw(struct tg3 *tp)
 	}
 	memset(tp->hw_status, 0, TG3_HW_STATUS_SIZE);
 
+	/* Clear statistics/status block in chip, and status block in ram. */
+	if (GET_ASIC_REV(tp->pci_chip_rev_id) != ASIC_REV_5705) {
+		for (i = NIC_SRAM_STATS_BLK;
+	     	     i < NIC_SRAM_STATUS_BLK + TG3_HW_STATUS_SIZE;
+	     	     i += sizeof(u32)) {
+			tg3_write_mem(tp, i, 0);
+			udelay(40);
+		}
+	}
+	memset(tp->hw_status, 0, TG3_HW_STATUS_SIZE);
+
 	/* Setup replenish threshold. */
 	tw32(RCVBDI_STD_THRESH, tp->rx_pending / 8);
 
@@ -7552,11 +7567,13 @@ static int __devinit tg3_init_one(struct pci_dev *pdev,
 	if (pm_cap == 0) {
 		printk(KERN_ERR PFX "Cannot find PowerManagement capability, "
 		       "aborting.\n");
+		err = -EIO;
 		goto err_out_free_res;
 	}
 
 	/* Configure DMA attributes. */
-	if (!pci_set_dma_mask(pdev, 0xffffffffffffffffULL)) {
+	err = pci_set_dma_mask(pdev, 0xffffffffffffffffULL);
+	if (!err) {
 		pci_using_dac = 1;
 	} else {
 		err = pci_set_dma_mask(pdev, 0xffffffffULL);

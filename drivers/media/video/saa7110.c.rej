@@ -1,0 +1,11 @@
+--- drivers/media/video/saa7110.c	2003-11-28 18:26:20.000000000 +0000
++++ drivers/media/video/saa7110.c	2004-01-06 12:41:53.000000000 +0000
+@@ -404,7 +404,7 @@
+ {
+ 	"saa7110",			/* name */
+ 
+-	I2C_DRIVERID_VIDEODECODER,	/* in i2c.h */
++	I2C_DRIVERID_VIDEODECODER,	/* in i2c-old.h */
+ 	I2C_SAA7110, I2C_SAA7110+1,	/* Addr range */
+ 
+ 	saa7110_attach,

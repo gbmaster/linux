@@ -1,0 +1,12 @@
+--- arch/mips/ld.script.in	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/ld.script.in	2004-01-06 12:43:42.000000000 +0000
+@@ -49,9 +49,6 @@
+   . = ALIGN(4096);	/* Align double page for init_task_union */
+   __init_end = .;
+ 
+-  . = ALIGN(4096);
+-  .data.page_aligned : { *(.data.idt) }
+-
+   . = ALIGN(32);
+   .data.cacheline_aligned : { *(.data.cacheline_aligned) }
+ 

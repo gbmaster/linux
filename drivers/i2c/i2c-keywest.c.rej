@@ -1,0 +1,10 @@
+--- drivers/i2c/i2c-keywest.c	2002-11-28 23:53:13.000000000 +0000
++++ drivers/i2c/i2c-keywest.c	2004-01-06 12:46:45.000000000 +0000
+@@ -45,7 +45,6 @@
+ 
+ #include <linux/module.h>
+ #include <linux/config.h>
+-#include <linux/version.h>
+ #include <linux/kernel.h>
+ #include <linux/ioport.h>
+ #include <linux/pci.h>

@@ -1,0 +1,11 @@
+--- arch/mips/vr41xx/casio-e55/setup.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/vr41xx/casio-e55/setup.c	2004-01-06 12:42:59.000000000 +0000
+@@ -59,7 +59,7 @@
+ 
+ 	vr41xx_bcu_init();
+ 
+-	vr41xx_cmu_init(0);
++	vr41xx_cmu_init();
+ 
+ 	vr41xx_siu_init(SIU_RS232C, 0);
+ }

@@ -1,0 +1,10 @@
+--- arch/ppc/configs/pplus_defconfig	2003-08-25 11:44:40.000000000 +0000
++++ arch/ppc/configs/pplus_defconfig	2004-01-06 12:44:04.000000000 +0000
+@@ -60,6 +60,7 @@
+ CONFIG_BINFMT_ELF=y
+ CONFIG_KERNEL_ELF=y
+ # CONFIG_BINFMT_MISC is not set
++# CONFIG_OOM_KILLER is not set
+ # CONFIG_PCI_NAMES is not set
+ # CONFIG_HOTPLUG is not set
+ # CONFIG_PCMCIA is not set

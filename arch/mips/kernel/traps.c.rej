@@ -1,0 +1,62 @@
+--- arch/mips/kernel/traps.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/kernel/traps.c	2004-01-06 12:44:07.000000000 +0000
+@@ -63,6 +63,7 @@
+ 
+ void (*board_be_init)(void);
+ int (*board_be_handler)(struct pt_regs *regs, int is_fixup);
++void (*board_nmi_handler_setup)(void);
+ 
+ int kstack_depth_to_print = 24;
+ 
+@@ -234,9 +235,10 @@
+ 	/*
+ 	 * Saved cp0 registers
+ 	 */
+-	printk("epc  : %08lx    %s\nStatus: %08lx\nCause : %08lx\n",
+-	       regs->cp0_epc, print_tainted(), regs->cp0_status,
+-	       regs->cp0_cause);
++	printk("epc   : %08lx    %s\n", regs->cp0_epc, print_tainted());
++	printk("Status: %08lx\n", regs->cp0_status);
++	printk("epc   : %08lx\n", regs->cp0_cause);
++	printk("PrId  : %08x\n", read_c0_prid());
+ }
+ 
+ void show_registers(struct pt_regs *regs)
+@@ -523,6 +525,8 @@
+ 		simulate_sc(regs, opcode);
+ 		return 0;
+ 	}
++
++	return -EFAULT;			/* Strange things going on ... */
+ }
+ 
+ asmlinkage void do_ov(struct pt_regs *regs)
+@@ -584,6 +588,8 @@
+ 	unsigned int opcode, bcode;
+ 	siginfo_t info;
+ 
++	die_if_kernel("Break instruction in kernel code", regs);
++
+ 	if (get_insn_opcode(regs, &opcode))
+ 		return;
+ 
+@@ -896,8 +902,7 @@
+ 
+ 	atomic_inc(&init_mm.mm_count);
+ 	current->active_mm = &init_mm;
+-	if (current->mm)
+-		BUG();
++	BUG_ON(current->mm);
+ 	enter_lazy_tlb(&init_mm, current, cpu);
+ }
+ 
+@@ -1007,6 +1012,9 @@
+ 		restore_fp_context = fpu_emulator_restore_context;
+ 	}
+ 
++	if (board_nmi_handler_setup)
++		board_nmi_handler_setup();
++
+ 	flush_icache_range(KSEG0, KSEG0 + 0x400);
+ 
+ 	atomic_inc(&init_mm.mm_count);	/* XXX UP?  */

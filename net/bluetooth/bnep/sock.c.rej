@@ -1,0 +1,39 @@
+--- net/bluetooth/bnep/sock.c	2003-06-13 14:51:39.000000000 +0000
++++ net/bluetooth/bnep/sock.c	2004-01-06 12:44:57.000000000 +0000
+@@ -55,36 +55,6 @@
+ #define BT_DBG( A... )
+ #endif
+ 
+-static inline struct socket *socki_lookup(struct inode *inode)
+-{
+-	return &inode->u.socket_i;
+-}
+-
+-static struct socket *sockfd_lookup(int fd, int *err)
+-{
+-	struct file *file;
+-	struct inode *inode;
+-	struct socket *sock;
+-
+-	if (!(file = fget(fd))) {
+-		*err = -EBADF;
+-		return NULL;
+-	}
+-
+-	inode = file->f_dentry->d_inode;
+-	if (!inode->i_sock || !(sock = socki_lookup(inode))) {
+-		*err = -ENOTSOCK;
+-		fput(file);
+-		return NULL;
+-	}
+-
+-	if (sock->file != file) {
+-		printk(KERN_ERR "socki_lookup: socket file changed!\n");
+-		sock->file = file;
+-	}
+-	return sock;
+-}
+- 
+ static int bnep_sock_release(struct socket *sock)
+ {
+ 	struct sock *sk = sock->sk;

@@ -1,0 +1,11 @@
+--- arch/mips/tx4927/common/tx4927_setup.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/mips/tx4927/common/tx4927_setup.c	2004-01-06 12:45:32.000000000 +0000
+@@ -120,7 +120,7 @@
+ 
+ 	/* to generate the first timer interrupt */
+ 	c1 = read_c0_count();
+-	count = c1 + (mips_counter_frequency / HZ);
++	count = c1 + (mips_hpt_frequency / HZ);
+ 	write_c0_compare(count);
+ 	c2 = read_c0_count();
+ 

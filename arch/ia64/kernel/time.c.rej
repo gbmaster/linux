@@ -1,0 +1,10 @@
+--- arch/ia64/kernel/time.c	2003-08-25 11:44:39.000000000 +0000
++++ arch/ia64/kernel/time.c	2004-01-06 12:43:08.000000000 +0000
+@@ -93,7 +93,6 @@
+ 		 * it!
+ 		 */
+ 		tv->tv_usec -= gettimeoffset();
+-		tv->tv_usec -= (jiffies - wall_jiffies) * (1000000 / HZ);
+ 
+ 		while (tv->tv_usec < 0) {
+ 			tv->tv_usec += 1000000;

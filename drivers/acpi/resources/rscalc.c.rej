@@ -1,0 +1,20 @@
+--- drivers/acpi/resources/rscalc.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/acpi/resources/rscalc.c	2004-01-06 12:44:44.000000000 +0000
+@@ -696,7 +696,7 @@
+ 		default:
+ 			/*
+ 			 * If we get here, everything is out of sync,
+-			 *  so exit with an error
++			 * exit with an error
+ 			 */
+ 			return_ACPI_STATUS (AE_AML_INVALID_RESOURCE_TYPE);
+ 		}
+@@ -704,7 +704,7 @@
+ 		/*
+ 		 * Update the return value and counter
+ 		 */
+-		buffer_size += ACPI_ALIGN_RESOURCE_SIZE(structure_size);
++		buffer_size += (u32) ACPI_ALIGN_RESOURCE_SIZE (structure_size);
+ 		bytes_parsed += bytes_consumed;
+ 
+ 		/*

@@ -1,0 +1,11 @@
+--- arch/mips/au1000/common/Makefile	2003-08-25 11:44:39.000000000 +0000
++++ arch/mips/au1000/common/Makefile	2004-01-06 12:46:24.000000000 +0000
+@@ -19,7 +19,7 @@
+ export-objs		= prom.o clocks.o power.o usbdev.o
+ 
+ obj-y := prom.o int-handler.o dma.o irq.o puts.o time.o reset.o \
+-	clocks.o power.o setup.o
++	clocks.o power.o setup.o sleeper.o
+ 
+ obj-$(CONFIG_AU1X00_USB_DEVICE) += usbdev.o
+ obj-$(CONFIG_KGDB) += dbg_io.o

@@ -1,0 +1,17 @@
+--- Rules.make	2002-08-03 00:39:42.000000000 +0000
++++ Rules.make	2004-01-06 12:43:53.000000000 +0000
+@@ -96,12 +96,12 @@
+ $(O_TARGET): $(obj-y)
+ 	rm -f $@
+     ifneq "$(strip $(obj-y))" ""
+-	$(LD) $(EXTRA_LDFLAGS) -r -o $@ $(filter $(obj-y), $^)
++	$(LD) $(LDFLAGS) $(EXTRA_LDFLAGS) -r -o $@ $(filter $(obj-y), $^)
+     else
+ 	$(AR) rcs $@
+     endif
+ 	@ ( \
+-	    echo 'ifeq ($(strip $(subst $(comma),:,$(EXTRA_LDFLAGS) $(obj-y))),$$(strip $$(subst $$(comma),:,$$(EXTRA_LDFLAGS) $$(obj-y))))' ; \
++	    echo 'ifeq ($(strip $(subst $(comma),:,$(LDFLAGS) $(EXTRA_LDFLAGS) $(obj-y))),$$(strip $$(subst $$(comma),:,$$(LDFLAGS) $$(EXTRA_LDFLAGS) $$(obj-y))))' ; \
+ 	    echo 'FILES_FLAGS_UP_TO_DATE += $@' ; \
+ 	    echo 'endif' \
+ 	) > $(dir $@)/.$(notdir $@).flags

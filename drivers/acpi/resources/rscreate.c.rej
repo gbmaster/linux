@@ -1,0 +1,11 @@
+--- drivers/acpi/resources/rscreate.c	2003-08-25 11:44:41.000000000 +0000
++++ drivers/acpi/resources/rscreate.c	2004-01-06 12:43:43.000000000 +0000
+@@ -331,7 +331,7 @@
+ 
+ 		/* Now align the current length */
+ 
+-		user_prt->length = ACPI_ROUND_UP_to_64_bITS (user_prt->length);
++		user_prt->length = (u32) ACPI_ROUND_UP_to_64_bITS (user_prt->length);
+ 
+ 		/*
+ 		 * 4) Fourth subobject: Dereference the PRT.source_index

@@ -1,0 +1,11 @@
+--- arch/ppc/platforms/Makefile	2003-11-28 18:26:19.000000000 +0000
++++ arch/ppc/platforms/Makefile	2004-01-06 12:46:45.000000000 +0000
+@@ -53,6 +53,8 @@
+ obj-$(CONFIG_LOPEC)		+= lopec_setup.o lopec_pci.o
+ obj-$(CONFIG_PAL4)		+= pal4_setup.o pal4_pci.o cpc700_pic.o
+ obj-$(CONFIG_PPLUS)		+= pplus_pci.o pplus_setup.o
++obj-$(CONFIG_PRPMC750)		+= prpmc750.o
++obj-$(CONFIG_SANDPOINT)		+= sandpoint.o
+ obj-$(CONFIG_SPRUCE)		+= spruce_setup.o spruce_pci.o cpc700_pic.o
+ 
+ ifeq ($(CONFIG_SMP),y)

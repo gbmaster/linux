@@ -1,0 +1,20 @@
+--- drivers/acpi/utilities/utdelete.c	2003-11-28 18:26:19.000000000 +0000
++++ drivers/acpi/utilities/utdelete.c	2004-01-06 12:44:28.000000000 +0000
+@@ -140,7 +140,7 @@
+ 
+ 		/* Walk the handler list for this device */
+ 
+-		handler_desc = object->device.address_space;
++		handler_desc = object->device.handler;
+ 		while (handler_desc) {
+ 			next_desc = handler_desc->address_space.next;
+ 			acpi_ut_remove_reference (handler_desc);
+@@ -193,7 +193,7 @@
+ 			 * default handlers -- and therefore, we created the context object
+ 			 * locally, it was not created by an external caller.
+ 			 */
+-			handler_desc = object->region.address_space;
++			handler_desc = object->region.handler;
+ 			if (handler_desc) {
+ 				if (handler_desc->address_space.hflags & ACPI_ADDR_HANDLER_DEFAULT_INSTALLED) {
+ 					obj_pointer = second_desc->extra.region_context;

@@ -1,0 +1,20 @@
+--- arch/mips/momentum/ocelot_g/prom.c	2002-11-28 23:53:10.000000000 +0000
++++ arch/mips/momentum/ocelot_g/prom.c	2004-01-06 12:44:59.000000000 +0000
+@@ -40,7 +40,7 @@
+ extern unsigned long gt64240_base;
+ extern unsigned long bus_clock;
+ 
+-#ifdef CONFIG_GALILLEO_GT64240_ETH
++#ifdef CONFIG_GALILEO_GT64240_ETH
+ extern unsigned char prom_mac_addr_base[6];
+ #endif
+ 
+@@ -71,7 +71,7 @@
+ 	mips_machgroup = MACH_GROUP_MOMENCO;
+ 	mips_machtype = MACH_MOMENCO_OCELOT_G;
+ 
+-#ifdef CONFIG_GALILLEO_GT64240_ETH
++#ifdef CONFIG_GALILEO_GT64240_ETH
+ 	/* get the base MAC address for on-board ethernet ports */
+ 	memcpy(prom_mac_addr_base, (void*)0xfc807cf2, 6);
+ #endif

@@ -1,0 +1,18 @@
+--- include/asm-m68k/system.h	2003-11-28 18:26:21.000000000 +0000
++++ include/asm-m68k/system.h	2004-01-06 12:45:29.000000000 +0000
+@@ -10,6 +10,8 @@
+ 
+ #define prepare_to_switch()	do { } while(0)
+ 
++#ifdef __KERNEL__
++
+ /*
+  * switch_to(n) should switch tasks to task ptr, first checking that
+  * ptr isn't the current task, in which case it does nothing.  This
+@@ -162,4 +164,6 @@
+ }
+ #endif
+ 
++#endif /* __KERNEL__ */
++
+ #endif /* _M68K_SYSTEM_H */

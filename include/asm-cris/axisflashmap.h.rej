@@ -1,0 +1,10 @@
+--- include/asm-cris/axisflashmap.h	2001-07-26 22:10:06.000000000 +0000
++++ include/asm-cris/axisflashmap.h	2004-01-06 12:44:09.000000000 +0000
+@@ -59,4 +59,7 @@
+ #define PARTITION_TYPE_KERNEL 0x0002
+ #define PARTITION_TYPE_JFFS   0x0003
+ 
++/* The master mtd for the entire flash. */
++extern struct mtd_info* axisflash_mtd;
++
+ #endif

@@ -1,0 +1,11 @@
+--- net/sched/sch_generic.c	2003-11-28 18:26:21.000000000 +0000
++++ net/sched/sch_generic.c	2004-01-06 12:42:15.000000000 +0000
+@@ -280,7 +280,7 @@
+ 	list = ((struct sk_buff_head*)qdisc->data) +
+ 		prio2band[skb->priority&TC_PRIO_MAX];
+ 
+-	if (list->qlen <= qdisc->dev->tx_queue_len) {
++	if (list->qlen < qdisc->dev->tx_queue_len) {
+ 		__skb_queue_tail(list, skb);
+ 		qdisc->q.qlen++;
+ 		qdisc->stats.bytes += skb->len;

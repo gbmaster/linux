@@ -1,0 +1,11 @@
+--- drivers/char/drm-4.0/bufs.c	2002-02-25 19:37:57.000000000 +0000
++++ drivers/char/drm-4.0/bufs.c	2004-01-06 12:42:19.000000000 +0000
+@@ -87,7 +87,7 @@
+ 					     MTRR_TYPE_WRCOMB, 1);
+ 		}
+ #endif
+-		map->handle = drm_ioremap(map->offset, map->size);
++		map->handle = drm_ioremap(map->offset, map->size, dev);
+ 		break;
+ 			
+ 

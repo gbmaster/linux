@@ -1,0 +1,28 @@
+--- arch/ppc64/kernel/pmc.c	2003-08-25 11:44:40.000000000 +0000
++++ arch/ppc64/kernel/pmc.c	2004-01-06 12:42:02.000000000 +0000
+@@ -74,7 +74,6 @@
+                                 page_table_lock : SPIN_LOCK_UNLOCKED};
+ 
+ extern spinlock_t hash_table_lock[];
+-extern inline unsigned long get_lock_slot(unsigned long vpn);
+ 
+ char *
+ ppc64_pmc_stab(int file)
+@@ -241,7 +240,7 @@
+ 		lock_slot = get_lock_slot(vpn); 
+ 		rpn = pa >> PAGE_SHIFT;
+ 
+-		spin_lock(&hash_table_lock[lock_slot].lock);
++		spin_lock(&hash_table_lock[lock_slot]);
+ 		/* Get a pointer to the linux page table entry for this page
+ 		 * allocating pmd or pte pages along the way as needed.  Note
+ 		 * that the pmd & pte pages are not themselfs bolted.
+@@ -266,7 +265,7 @@
+ 
+ 		*ptep = pte;
+ 
+-		spin_unlock(&hash_table_lock[lock_slot].lock);
++		spin_unlock(&hash_table_lock[lock_slot]);
+ 	}
+ 
+ 	spin_unlock(&btmalloc_mm.page_table_lock);

@@ -1,0 +1,24 @@
+--- net/ipv4/netfilter/ipt_recent.c	2003-08-25 11:44:44.000000000 +0000
++++ net/ipv4/netfilter/ipt_recent.c	2004-01-06 12:45:43.000000000 +0000
+@@ -91,8 +91,10 @@
+  */
+ static spinlock_t recent_lock = SPIN_LOCK_UNLOCKED;
+ 
++#ifdef CONFIG_PROC_FS
+ /* Our /proc/net/ipt_recent entry */
+ static struct proc_dir_entry *proc_net_ipt_recent = NULL;
++#endif
+ 
+ /* Function declaration for later. */
+ static int
+@@ -963,8 +965,10 @@
+ 	int count;
+ 
+ 	printk(version);
++#ifdef CONFIG_PROC_FS
+ 	proc_net_ipt_recent = proc_mkdir("ipt_recent",proc_net);
+ 	if(!proc_net_ipt_recent) return -ENOMEM;
++#endif
+ 
+ 	if(ip_list_hash_size && ip_list_hash_size <= ip_list_tot) {
+ 	  printk(KERN_WARNING RECENT_NAME ": ip_list_hash_size too small, resetting to default.\n");

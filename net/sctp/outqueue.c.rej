@@ -1,0 +1,10 @@
+--- net/sctp/outqueue.c	2003-11-28 18:26:21.000000000 +0000
++++ net/sctp/outqueue.c	2004-01-06 12:43:19.000000000 +0000
+@@ -53,6 +53,7 @@
+ #include <net/sock.h>	  /* For skb_set_owner_w */
+ 
+ #include <net/sctp/sctp.h>
++#include <net/sctp/sm.h>
+ 
+ /* Declare internal functions here.  */
+ static int sctp_acked(sctp_sackhdr_t *sack, __u32 tsn);

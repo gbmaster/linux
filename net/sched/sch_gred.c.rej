@@ -1,0 +1,20 @@
+--- net/sched/sch_gred.c	2003-08-25 11:44:44.000000000 +0000
++++ net/sched/sch_gred.c	2004-01-06 12:46:00.000000000 +0000
+@@ -110,7 +110,7 @@
+ 	unsigned long	qave=0;	
+ 	int i=0;
+ 
+-	if (!t->initd && skb_queue_len(&sch->q) <= sch->dev->tx_queue_len) {
++	if (!t->initd && skb_queue_len(&sch->q) < sch->dev->tx_queue_len) {
+ 		D2PRINTK("NO GRED Queues setup yet! Enqueued anyway\n");
+ 		goto do_enqueue;
+ 	}
+@@ -175,7 +175,7 @@
+ 	if ((q->qave+qave) < q->qth_min) {
+ 		q->qcount = -1;
+ enqueue:
+-		if (q->backlog <= q->limit) {
++		if (q->backlog + skb->len <= q->limit) {
+ 			q->backlog += skb->len;
+ do_enqueue:
+ 			__skb_queue_tail(&sch->q, skb);

@@ -1,0 +1,49 @@
+--- include/asm-m68k/mmu_context.h	2000-12-29 22:07:23.000000000 +0000
++++ include/asm-m68k/mmu_context.h	2004-01-06 12:42:49.000000000 +0000
+@@ -13,8 +13,8 @@
+ #include <asm/page.h>
+ #include <asm/pgalloc.h>
+ 
+-extern inline int
+-init_new_context(struct task_struct *tsk, struct mm_struct *mm)
++static inline int init_new_context(struct task_struct *tsk,
++				   struct mm_struct *mm)
+ {
+ 	mm->context = virt_to_phys(mm->pgd);
+ 	return 0;
+@@ -22,7 +22,7 @@
+ 
+ #define destroy_context(mm)		do { } while(0)
+ 
+-extern inline void switch_mm_0230(struct mm_struct *mm)
++static inline void switch_mm_0230(struct mm_struct *mm)
+ {
+ 	unsigned long crp[2] = {
+ 		0x80000000 | _PAGE_TABLE, mm->context
+@@ -55,7 +55,7 @@
+ 	asm volatile (".chip 68k");
+ }
+ 
+-extern inline void switch_mm_0460(struct mm_struct *mm)
++static inline void switch_mm_0460(struct mm_struct *mm)
+ {
+ 	asm volatile (".chip 68040");
+ 
+@@ -89,7 +89,7 @@
+ 	}
+ }
+ 
+-extern inline void activate_mm(struct mm_struct *prev_mm,
++static inline void activate_mm(struct mm_struct *prev_mm,
+ 			       struct mm_struct *next_mm)
+ {
+ 	next_mm->context = virt_to_phys(next_mm->pgd);
+@@ -140,7 +140,7 @@
+ 	activate_context(tsk->mm);
+ }
+ 
+-extern inline void activate_mm(struct mm_struct *prev_mm,
++static inline void activate_mm(struct mm_struct *prev_mm,
+ 			       struct mm_struct *next_mm)
+ {
+ 	activate_context(next_mm);

@@ -1,0 +1,26 @@
+--- arch/mips/dec/setup.c	2003-08-25 11:44:39.000000000 +0000
++++ arch/mips/dec/setup.c	2004-01-06 12:43:53.000000000 +0000
+@@ -48,6 +48,11 @@
+ 
+ extern asmlinkage void decstation_handle_int(void);
+ 
++#ifdef CONFIG_BLK_DEV_INITRD
++extern unsigned long initrd_start, initrd_end;
++extern void * __rd_start, * __rd_end;
++#endif
++
+ spinlock_t ioasic_ssr_lock;
+ 
+ volatile u32 *ioasic_base;
+@@ -131,6 +136,11 @@
+ 
+ void __init decstation_setup(void)
+ {
++#ifdef CONFIG_BLK_DEV_INITRD
++       ROOT_DEV = MKDEV(RAMDISK_MAJOR, 0);
++       initrd_start = (unsigned long)&__rd_start;
++       initrd_end = (unsigned long)&__rd_end;
++#endif
+ 	board_be_init = dec_be_init;
+ 	board_time_init = dec_time_init;
+ 	board_timer_setup = dec_timer_setup;
