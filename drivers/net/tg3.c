@@ -55,8 +55,8 @@
 
 #define DRV_MODULE_NAME		"tg3"
 #define PFX DRV_MODULE_NAME	": "
-#define DRV_MODULE_VERSION	"2.4"
-#define DRV_MODULE_RELDATE	"December 2, 2003"
+#define DRV_MODULE_VERSION	"2.6"
+#define DRV_MODULE_RELDATE	"February 3, 2004"
 
 #define TG3_DEF_MAC_MODE	0
 #define TG3_DEF_RX_MODE		0
@@ -174,10 +174,6 @@ static struct pci_device_id tg3_pci_tbl[] = {
 	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5901,
 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
 	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5901_2,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
-	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5704S_2,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
-	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5705F,
 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
 	{ PCI_VENDOR_ID_BROADCOM, PCI_DEVICE_ID_TIGON3_5704S_2,
 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0UL },
@@ -4713,17 +4709,6 @@ static int tg3_reset_hw(struct tg3 *tp)
 		       tp->dev->name);
 		return -ENODEV;
 	}
-
-	/* Clear statistics/status block in chip, and status block in ram. */
-	if (GET_ASIC_REV(tp->pci_chip_rev_id) != ASIC_REV_5705) {
-		for (i = NIC_SRAM_STATS_BLK;
-	     	     i < NIC_SRAM_STATUS_BLK + TG3_HW_STATUS_SIZE;
-	     	     i += sizeof(u32)) {
-			tg3_write_mem(tp, i, 0);
-			udelay(40);
-		}
-	}
-	memset(tp->hw_status, 0, TG3_HW_STATUS_SIZE);
 
 	/* Clear statistics/status block in chip, and status block in ram. */
 	if (GET_ASIC_REV(tp->pci_chip_rev_id) != ASIC_REV_5705) {

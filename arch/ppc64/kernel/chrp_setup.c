@@ -89,12 +89,14 @@ extern void find_and_init_phbs(void);
 extern void pSeries_pcibios_fixup(void);
 extern void iSeries_pcibios_fixup(void);
 
+extern void pSeries_get_boot_time(struct rtc_time *rtc_time);
 extern void pSeries_get_rtc_time(struct rtc_time *rtc_time);
 extern int  pSeries_set_rtc_time(struct rtc_time *rtc_time);
 void pSeries_calibrate_decr(void);
-static void fwnmi_init(void);
+static void machine_check_init(void);
 extern void SystemReset_FWNMI(void), MachineCheck_FWNMI(void);	/* from head.S */
-int fwnmi_active;  /* TRUE if an FWNMI handler is present */
+int fwnmi_active = 0;  /* TRUE if an FWNMI handler is present */
+int check_exception_flag = 0;  /* TRUE if a check-exception handler present */
 
 kdev_t boot_dev;
 unsigned long  virtPython0Facilities = 0;  // python0 facility area (memory mapped io) (64-bit format) VIRTUAL address.

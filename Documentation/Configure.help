@@ -24450,6 +24450,11 @@ CONFIG_PPC_RTAS
 
   If unsure, say Y.
 
+Support for Lpar Configuration data in /proc
+CONFIG_LPARCFG
+  This option adds lparcfg entry as /proc/ppc64/lparcfg which returns
+  system configuration info in <key word>=<value> pairs. 
+
 MESH (Power Mac internal SCSI) support
 CONFIG_SCSI_MESH
   Many Power Macintoshes and clones have a MESH (Macintosh Enhanced

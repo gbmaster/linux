@@ -63,7 +63,6 @@ extern void pSeries_init_early( void );
 extern void pSeriesLP_init_early(void);
 extern void mm_init_ppc64( void ); 
 extern void pseries_secondary_smp_init(unsigned long);
-extern void vpa_init(int cpu);
 
 unsigned long decr_overclock = 1;
 unsigned long decr_overclock_proc0 = 1;
@@ -167,7 +166,7 @@ void setup_system(unsigned long r3, unsigned long r4, unsigned long r5,
 	printk("-----------------------------------------------------\n");
 	printk("naca                          = 0x%p\n", naca);
 	printk("naca->pftSize                 = 0x%lx\n", naca->pftSize);
-	printk("naca->paca                    = 0x%lx\n\n", naca->paca);
+	printk("naca->paca                    = 0x%p\n\n", naca->paca);
 	printk("systemcfg                     = 0x%p\n", systemcfg);
 	printk("systemcfg->platform           = 0x%x\n", systemcfg->platform);
 	printk("systemcfg->processor          = 0x%x\n", systemcfg->processor);

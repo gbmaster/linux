@@ -51,15 +51,6 @@
 #define DO_COPY_EE()	rldicl	r20,r23,49,63
 #endif
 
-/* copy saved SOFTE bit or EE bit from saved MSR depending
- * if we are doing soft-disable or not
- */
-#ifdef DO_SOFT_DISABLE
-#define DO_COPY_EE()	ld	r20,SOFTE(r1)
-#else
-#define DO_COPY_EE()	rldicl	r20,r23,49,63
-#endif
-
 /*
  * hcall interface to pSeries LPAR
  */
@@ -1387,6 +1378,12 @@ _GLOBAL(save_remaining_regs)
 	addi	r24,r1,STACK_FRAME_OVERHEAD
 	ld	r22,PACACURRENT(r13)
 	std	r24,THREAD+PT_REGS(r22)
+#ifdef CONFIG_ALTIVEC
+BEGIN_FTR_SECTION
+	mfspr	r24,SPRN_VRSAVE		/* if save vrsave register value */
+	std	r24,THREAD+THREAD_VRSAVE(r22)
+END_FTR_SECTION_IFSET(CPU_FTR_ALTIVEC)
+#endif /* CONFIG_ALTIVEC */
 2:
 	SET_REG_TO_CONST(r22, MSR_KERNEL)
 
@@ -1987,10 +1984,6 @@ _STATIC(start_here_pSeries)
 	/* get a new offset, now that the kernel has moved. */
 	bl	.reloc_offset
 	mr	r26,r3
-
-	mfmsr	r6
-	ori	r6,r6,MSR_RI
-	mtmsrd	r6			/* RI on */
 
 	mfmsr	r6
 	ori	r6,r6,MSR_RI

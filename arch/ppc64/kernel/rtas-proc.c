@@ -865,7 +865,7 @@ static ssize_t ppc_rtas_tone_freq_write(struct file * file, const char * buf,
 	}
 	if (freq < 0) freq = 0;
 	rtas_tone_frequency = freq; /* save it for later */
-	error = rtas_call(rtas_token("set-indicator"), 3, 1, NULL,
+	error = rtas_call(set_indicator, 3, 1, NULL,
 			TONE_FREQUENCY, 0, freq);
 	if (error != 0)
 		printk(KERN_WARNING "error: setting tone frequency returned: %s\n", 

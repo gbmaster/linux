@@ -1,9 +1,0 @@
---- arch/mips64/mm/fault.c	2003-08-25 11:44:40.000000000 +0000
-+++ arch/mips64/mm/fault.c	2004-01-06 12:44:53.000000000 +0000
-@@ -266,5 +266,5 @@
- 	return;
- 
- vmalloc_fault:
--	panic("Pagefault for kernel virtual memory");
-+	die("Pagefault for kernel virtual memory", regs);
- }

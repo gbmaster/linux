@@ -60,6 +60,17 @@ long register_vpa(unsigned long flags, unsigned long proc, unsigned long vpa)
 	return(0);
 }
 
+void vpa_init(int cpu)
+{
+	unsigned long flags;
+
+	/* Register the Virtual Processor Area (VPA) */
+	printk(KERN_INFO "register_vpa: cpu 0x%x\n", cpu);
+	flags = 1UL << (63 - 18);
+	paca[cpu].xLpPaca.xSLBCount = 64; /* SLB restore highwater mark */
+	register_vpa(flags, cpu, __pa((unsigned long)&(paca[cpu].xLpPaca)));
+}
+
 long plpar_tce_get(unsigned long liobn,
 		   unsigned long ioba,
 		   unsigned long *tce_ret)
