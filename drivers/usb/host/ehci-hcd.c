@@ -30,6 +30,7 @@
 #include <linux/timer.h>
 #include <linux/list.h>
 #include <linux/interrupt.h>
+#include <linux/reboot.h>
 
 #ifdef CONFIG_USB_DEBUG
 	#define DEBUG
@@ -261,6 +262,7 @@ static void ehci_watchdog (unsigned long param)
 
 		if (status & STS_IAA) {
 			ehci_vdbg (ehci, "lost IAA\n");
+			COUNT (ehci->stats.lost_iaa);
 			writel (STS_IAA, &ehci->regs->status);
 			ehci->reclaim_ready = 1;
 		}
@@ -306,6 +308,19 @@ static int bios_handoff (struct ehci_hcd *ehci, int where, u32 cap)
 	}
 	return 0;
 }
+
+static int
+ehci_reboot (struct notifier_block *self, unsigned long code, void *null)
+{
+	struct ehci_hcd		*ehci;
+
+	ehci = container_of (self, struct ehci_hcd, reboot_notifier);
+
+	/* make BIOS/etc use companion controller during reboot */
+	writel (0, &ehci->regs->configured_flag);
+	return 0;
+}
+
 
 /* called by khubd or root hub init threads */
 
@@ -465,6 +480,9 @@ done2:
 	 * are explicitly handed to companion controller(s), so no TT is
 	 * involved with the root hub.
 	 */
+	ehci->reboot_notifier.notifier_call = ehci_reboot;
+	register_reboot_notifier (&ehci->reboot_notifier);
+
 	ehci->hcd.state = USB_STATE_READY;
 	writel (FLAG_CF, &ehci->regs->configured_flag);
 	readl (&ehci->regs->command);	/* unblock posted write */
@@ -491,6 +509,7 @@ done2:
 			ehci_ready (ehci);
 		ehci_reset (ehci);
 		bus->root_hub = 0;
+		usb_free_dev (udev); 
 		retval = -ENODEV;
 		goto done2;
 	}
@@ -520,6 +539,7 @@ static void ehci_stop (struct usb_hcd *hcd)
 
 	/* let companion controllers work when we aren't */
 	writel (0, &ehci->regs->configured_flag);
+	unregister_reboot_notifier (&ehci->reboot_notifier);
 
 	remove_debug_files (ehci);
 
@@ -530,8 +550,9 @@ static void ehci_stop (struct usb_hcd *hcd)
 	ehci_mem_cleanup (ehci);
 
 #ifdef	EHCI_STATS
-	ehci_dbg (ehci, "irq normal %ld err %ld reclaim %ld\n",
-		ehci->stats.normal, ehci->stats.error, ehci->stats.reclaim);
+	ehci_dbg (ehci, "irq normal %ld err %ld reclaim %ld (lost %ld)\n",
+		ehci->stats.normal, ehci->stats.error, ehci->stats.reclaim,
+		ehci->stats.lost_iaa);
 	ehci_dbg (ehci, "complete %ld unlink %ld\n",
 		ehci->stats.complete, ehci->stats.unlink);
 #endif

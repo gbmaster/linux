@@ -79,7 +79,7 @@
 
 #include "usb-ohci.h"
 
-#include "hcd.h"
+#include "../hcd.h"
 
 #ifdef CONFIG_PMAC_PBOOK
 #include <asm/machdep.h>

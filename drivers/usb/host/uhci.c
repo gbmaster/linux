@@ -57,7 +57,7 @@
 
 #include <linux/pm.h>
 
-#include "hcd.h"
+#include "../hcd.h"
 
 /*
  * Version Information

@@ -746,6 +746,11 @@ static void qh_link_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
 		if (!(cmd & CMD_ASE)) {
 			/* in case a clear of CMD_ASE didn't take yet */
 			(void) handshake (&ehci->regs->status, STS_ASS, 0, 150);
+
+			/* force async head to be valid */
+			writel ((u32)ehci->async->qh_dma,
+					&ehci->regs->async_next);
+
 			cmd |= CMD_ASE | CMD_RUN;
 			writel (cmd, &ehci->regs->command);
 			ehci->hcd.state = USB_STATE_RUNNING;
@@ -834,6 +839,7 @@ static struct ehci_qh *qh_append_tds (
 				&& !usb_pipecontrol (urb->pipe)) {
 			/* "never happens": drivers do stall cleanup right */
 			if (qh->qh_state != QH_STATE_IDLE
+					&& !list_empty (&qh->qtd_list)
 					&& qh->qh_state != QH_STATE_COMPLETING)
 				ehci_warn (ehci, "clear toggle dev%d "
 						"ep%d%s: not idle\n",
@@ -949,7 +955,7 @@ static void end_unlink_async (struct ehci_hcd *ehci, struct pt_regs *regs)
 
 	del_timer (&ehci->watchdog);
 
-	qh->hw_next = cpu_to_le32 (qh->qh_dma);
+	// qh->hw_next = cpu_to_le32 (qh->qh_dma);
 	qh->qh_state = QH_STATE_IDLE;
 	qh->qh_next.qh = 0;
 	qh_put (ehci, qh);			// refcount from reclaim 
@@ -1048,6 +1054,7 @@ static void
 scan_async (struct ehci_hcd *ehci, struct pt_regs *regs)
 {
 	struct ehci_qh		*qh;
+	int			unlink_delay = 0;
 
 	if (!++(ehci->stamp))
 		ehci->stamp++;
@@ -1074,17 +1081,25 @@ rescan:
 				}
 			}
 
-			/* unlink idle entries, reducing HC PCI usage as
-			 * well as HCD schedule-scanning costs.
-			 *
-			 * FIXME don't unlink idle entries so quickly; it
-			 * can penalize (common) half duplex protocols.
+			/* unlink idle entries, reducing HC PCI usage as well
+			 * as HCD schedule-scanning costs.  delay for any qh
+			 * we just scanned, there's a not-unusual case that it
+			 * doesn't stay idle for long.
+			 * (plus, avoids some kind of re-activation race.)
 			 */
-			if (list_empty (&qh->qtd_list) && !ehci->reclaim) {
-				start_unlink_async (ehci, qh);
+			if (list_empty (&qh->qtd_list)) {
+				if (qh->stamp == ehci->stamp)
+					unlink_delay = 1;
+				else if (!ehci->reclaim) {
+					start_unlink_async (ehci, qh);
+					unlink_delay = 0;
+				}
 			}
 
 			qh = qh->qh_next.qh;
 		} while (qh);
 	}
+
+	if (unlink_delay && !timer_pending (&ehci->watchdog))
+		mod_timer (&ehci->watchdog, jiffies + EHCI_WATCHDOG_JIFFIES/2);
 }

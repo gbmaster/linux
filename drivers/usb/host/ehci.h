@@ -27,6 +27,7 @@ struct ehci_stats {
 	unsigned long		normal;
 	unsigned long		error;
 	unsigned long		reclaim;
+	unsigned long		lost_iaa;
 
 	/* termination of urbs from core */
 	unsigned long		complete;
@@ -81,8 +82,10 @@ struct ehci_hcd {			/* one per controller */
 	struct pci_pool		*sitd_pool;	/* sitd per split iso urb */
 
 	struct timer_list	watchdog;
+	struct notifier_block	reboot_notifier;
 	unsigned		stamp;
 
+	/* irq statistics */
 #ifdef EHCI_STATS
 	struct ehci_stats	stats;
 #	define COUNT(x) do { (x)++; } while (0)
