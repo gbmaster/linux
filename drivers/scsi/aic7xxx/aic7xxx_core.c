@@ -37,14 +37,20 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGES.
  *
- * $Id: //depot/aic7xxx/aic7xxx/aic7xxx.c#50 $
+ * $Id: //depot/linux-aic7xxx-2.4.18_rc4/drivers/scsi/aic7xxx/aic7xxx_core.c#1 $
  *
  * $FreeBSD: src/sys/dev/aic7xxx/aic7xxx.c,v 1.61 2000/11/13 03:35:43 gibbs Exp $
  */
 
+#ifdef __linux__
 #include "aic7xxx_osm.h"
 #include "aic7xxx_inline.h"
 #include "aicasm/aicasm_insformat.h"
+#else
+#include <dev/aic7xxx/aic7xxx_osm.h>
+#include <dev/aic7xxx/aic7xxx_inline.h>
+#include <dev/aic7xxx/aicasm/aicasm_insformat.h>
+#endif
 
 /****************************** Softc Data ************************************/
 struct ahc_softc_tailq ahc_tailq = TAILQ_HEAD_INITIALIZER(ahc_tailq);
@@ -244,10 +250,15 @@ ahc_restart(struct ahc_softc *ahc)
 
 	ahc_pause(ahc);
 
+	/* No more pending messages. */
+	ahc_clear_msg_state(ahc);
+
 	ahc_outb(ahc, SCSISIGO, 0);		/* De-assert BSY */
 	ahc_outb(ahc, MSG_OUT, MSG_NOOP);	/* No message to send */
 	ahc_outb(ahc, SXFRCTL1, ahc_inb(ahc, SXFRCTL1) & ~BITBUCKET);
 	ahc_outb(ahc, LASTPHASE, P_BUSFREE);
+	ahc_outb(ahc, SAVED_SCSIID, 0xFF);
+	ahc_outb(ahc, SAVED_LUN, 0xFF);
 
 	/*
 	 * Ensure that the sequencer's idea of TQINPOS
@@ -327,7 +338,7 @@ ahc_run_qoutfifo(struct ahc_softc *ahc)
 		 * Save off the residual
 		 * if there is one.
 		 */
-		ahc_update_residual(scb);
+		ahc_update_residual(ahc, scb);
 		ahc_done(ahc, scb);
 	}
 }
@@ -488,7 +499,7 @@ ahc_handle_seqint(struct ahc_softc *ahc, u_int intstat)
 			/*
 			 * Save off the residual if there is one.
 			 */
-			ahc_update_residual(scb);
+			ahc_update_residual(ahc, scb);
 #ifdef AHC_DEBUG
 			if (ahc_debug & AHC_SHOWSENSE) {
 				ahc_print_path(ahc, scb);
@@ -1291,7 +1302,6 @@ ahc_handle_scsiint(struct ahc_softc *ahc, u_int intstat)
 			       ahc_inb(ahc, SEQADDR0)
 				| (ahc_inb(ahc, SEQADDR1) << 8));
 		}
-		ahc_clear_msg_state(ahc);
 		ahc_outb(ahc, CLRINT, CLRSCSIINT);
 		ahc_restart(ahc);
 	} else {
@@ -1388,9 +1398,8 @@ ahc_clear_critical_section(struct ahc_softc *ahc)
 			stepping = TRUE;
 		}
 		ahc_outb(ahc, HCNTRL, ahc->unpause);
-		do {
+		while (!ahc_is_paused(ahc))
 			ahc_delay(200);
-		} while (!ahc_is_paused(ahc));
 	}
 	if (stepping) {
 		ahc_outb(ahc, SIMODE0, simode0);
@@ -1414,6 +1423,10 @@ ahc_clear_intstat(struct ahc_softc *ahc)
 }
 
 /**************************** Debugging Routines ******************************/
+#ifdef AHC_DEBUG
+int ahc_debug = AHC_DEBUG;
+#endif
+
 void
 ahc_print_scb(struct scb *scb)
 {
@@ -1531,7 +1544,8 @@ ahc_free_tstate(struct ahc_softc *ahc, u_int scsi_id, char channel, int force)
 struct ahc_syncrate *
 ahc_devlimited_syncrate(struct ahc_softc *ahc,
 			struct ahc_initiator_tinfo *tinfo,
-			u_int *period, u_int *ppr_options, role_t role) {
+			u_int *period, u_int *ppr_options, role_t role)
+{
 	struct	ahc_transinfo *transinfo;
 	u_int	maxsync;
 
@@ -2584,7 +2598,7 @@ reswitch:
 
 		/*
 		 * Read the latched byte, but turn off SPIOEN first
-		 * so that we don't inadvertently cause a REQ for the
+		 * so that we don't inadvertantly cause a REQ for the
 		 * next byte.
 		 */
 		ahc_outb(ahc, SXFRCTL0, ahc_inb(ahc, SXFRCTL0) & ~SPIOEN);
@@ -3714,7 +3728,7 @@ ahc_shutdown(void *arg)
 	ahc_outb(ahc, SXFRCTL0, 0);
 	ahc_outb(ahc, DSPCISTATUS, 0);
 
-	for (i = TARG_SCSIRATE; i < HA_274_BIOSCTRL; i++)
+	for (i = TARG_SCSIRATE; i < SCSICONF; i++)
 		ahc_outb(ahc, i, 0);
 }
 
@@ -3756,9 +3770,8 @@ ahc_reset(struct ahc_softc *ahc)
 	 * Ensure that the reset has finished
 	 */
 	wait = 1000;
-	do {
+	while (--wait && !(ahc_inb(ahc, HCNTRL) & CHIPRSTACK))
 		ahc_delay(1000);
-	} while (--wait && !(ahc_inb(ahc, HCNTRL) & CHIPRSTACK));
 
 	if (wait == 0) {
 		printf("%s: WARNING - Failed chip reset!  "
@@ -3867,10 +3880,6 @@ ahc_build_free_scb_list(struct ahc_softc *ahc)
 	/* Make sure that the last SCB terminates the free list */
 	ahc_outb(ahc, SCBPTR, i-1);
 	ahc_outb(ahc, SCB_NEXT, SCB_LIST_NULL);
-
-	/* Ensure we clear the 0 SCB's control byte. */
-	ahc_outb(ahc, SCBPTR, 0);
-	ahc_outb(ahc, SCB_CONTROL, 0);
 }
 
 static int
@@ -4234,6 +4243,12 @@ ahc_init(struct ahc_softc *ahc)
 		}
 	}
 	printf ("\n");
+	/*
+	 * Reading uninitialized scratch ram may
+	 * generate parity errors.
+	 */
+	ahc_outb(ahc, CLRINT, CLRPARERR);
+	ahc_outb(ahc, CLRINT, CLRBRKADRINT);
 #endif
 	max_targ = 15;
 
@@ -4425,7 +4440,7 @@ ahc_init(struct ahc_softc *ahc)
 	tagenable = ALL_TARGETS_MASK;
 
 	/* Grab the disconnection disable table and invert it for our needs */
-	if (ahc->flags & AHC_USEDEFAULTS) {
+	if ((ahc->flags & AHC_USEDEFAULTS) != 0) {
 		printf("%s: Host Adapter Bios disabled.  Using default SCSI "
 			"device parameters\n", ahc_name(ahc));
 		ahc->flags |= AHC_EXTENDED_TRANS_A|AHC_EXTENDED_TRANS_B|
@@ -5068,7 +5083,8 @@ ahc_search_qinfifo(struct ahc_softc *ahc, int target, char channel,
 	uint8_t qinstart;
 	uint8_t qinpos;
 	uint8_t qintail;
-	uint8_t next, prev;
+	uint8_t next;
+	uint8_t prev;
 	uint8_t curscbptr;
 	int	found;
 	int	maxtarget;
@@ -5083,7 +5099,6 @@ ahc_search_qinfifo(struct ahc_softc *ahc, int target, char channel,
 	} else
 		qinstart = ahc_inb(ahc, QINPOS);
 	qinpos = qinstart;
-	next = ahc_inb(ahc, NEXT_QUEUED_SCB);
 	found = 0;
 	prev_scb = NULL;
 
@@ -5133,9 +5148,9 @@ ahc_search_qinfifo(struct ahc_softc *ahc, int target, char channel,
 				ahc_done(ahc, scb);
 
 				/* FALLTHROUGH */
+			}
 			case SEARCH_REMOVE:
 				break;
-			}
 			case SEARCH_COUNT:
 				ahc_qinfifo_requeue(ahc, prev_scb, scb);
 				prev_scb = scb;
@@ -5646,6 +5661,7 @@ ahc_reset_current_bus(struct ahc_softc *ahc)
 	ahc_outb(ahc, SIMODE1, ahc_inb(ahc, SIMODE1) & ~ENSCSIRST);
 	scsiseq = ahc_inb(ahc, SCSISEQ);
 	ahc_outb(ahc, SCSISEQ, scsiseq | SCSIRSTO);
+	ahc_flush_device_writes(ahc);
 	ahc_delay(AHC_BUSRESET_DELAY);
 	/* Turn off the bus reset */
 	ahc_outb(ahc, SCSISEQ, scsiseq & ~SCSIRSTO);
@@ -5726,7 +5742,6 @@ ahc_reset_channel(struct ahc_softc *ahc, char channel, int initiate_reset)
 		restart_needed = FALSE;
 	} else {
 		/* Case 2: A command from this bus is active or we're idle */
-		ahc_clear_msg_state(ahc);
 		simode1 = ahc_inb(ahc, SIMODE1) & ~(ENBUSFREE|ENSCSIRST);
 		ahc_outb(ahc, SIMODE1, simode1);
 		if (initiate_reset)
@@ -5819,7 +5834,7 @@ ahc_reset_channel(struct ahc_softc *ahc, char channel, int initiate_reset)
  * Calculate the residual for a just completed SCB.
  */
 void
-ahc_calc_residual(struct scb *scb)
+ahc_calc_residual(struct ahc_softc *ahc, struct scb *scb)
 {
 	struct hardware_scb *hscb;
 	struct status_pkt *spkt;
@@ -6299,7 +6314,8 @@ ahc_dump_card_state(struct ahc_softc *ahc)
 	printf("ACCUM = 0x%x, SINDEX = 0x%x, DINDEX = 0x%x, ARG_2 = 0x%x\n",
 	       ahc_inb(ahc, ACCUM), ahc_inb(ahc, SINDEX), ahc_inb(ahc, DINDEX),
 	       ahc_inb(ahc, ARG_2));
-	printf("HCNT = 0x%x\n", ahc_inb(ahc, HCNT));
+	printf("HCNT = 0x%x SCBPTR = 0x%x\n", ahc_inb(ahc, HCNT),
+	       ahc_inb(ahc, SCBPTR));
 	printf("SCSISEQ = 0x%x, SBLKCTL = 0x%x\n",
 	       ahc_inb(ahc, SCSISEQ), ahc_inb(ahc, SBLKCTL));
 	printf(" DFCNTRL = 0x%x, DFSTATUS = 0x%x\n",
@@ -6372,6 +6388,17 @@ ahc_dump_card_state(struct ahc_softc *ahc)
 	}
 	printf("\n");
 
+	printf("Sequencer SCB Info: ");
+	for (i = 0; i < ahc->scb_data->maxhscbs; i++) {
+		ahc_outb(ahc, SCBPTR, i);
+		printf("%d(c 0x%x, s 0x%x, l %d, t 0x%x) ",
+		       i, ahc_inb(ahc, SCB_CONTROL),
+		       ahc_inb(ahc, SCB_SCSIID),
+		       ahc_inb(ahc, SCB_LUN),
+		       ahc_inb(ahc, SCB_TAG));
+	}
+	printf("\n");
+
 	printf("Pending list: ");
 	i = 0;
 	LIST_FOREACH(scb, &ahc->pending_scbs, pending_links) {
@@ -6379,7 +6406,8 @@ ahc_dump_card_state(struct ahc_softc *ahc)
 			break;
 		if (scb != LIST_FIRST(&ahc->pending_scbs))
 			printf(", ");
-		printf("%d", scb->hscb->tag);
+		printf("%d(c 0x%x, s 0x%x, l %d)", scb->hscb->tag,
+		       scb->hscb->control, scb->hscb->scsiid, scb->hscb->lun);
 		if ((ahc->flags & AHC_PAGESCBS) == 0) {
 			ahc_outb(ahc, SCBPTR, scb->hscb->tag);
 			printf("(0x%x, 0x%x)", ahc_inb(ahc, SCB_CONTROL),

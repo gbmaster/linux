@@ -36,11 +36,11 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGES.
  *
- * $Id: //depot/aic7xxx/linux/drivers/scsi/aic7xxx/aic7xxx_linux_host.h#5 $
+ * $Id: //depot/linux-aic7xxx-2.4.18_rc4/drivers/scsi/aic7xxx/aic7xxx_host.h#1 $
  */
 
-#ifndef _AIC7XXX_LINUX_HOST_H_
-#define _AIC7XXX_LINUX_HOST_H_
+#ifndef _AIC7XXX_HOST_H_
+#define _AIC7XXX_HOST_H_
 
 int		 ahc_linux_proc_info(char *, char **, off_t, int, int, int);
 int		 ahc_linux_queue(Scsi_Cmnd *, void (*)(Scsi_Cmnd *));
@@ -92,4 +92,4 @@ int		 ahc_linux_abort(Scsi_Cmnd *);
 	use_new_eh_code: 1					\
 }
 
-#endif /* _AIC7XXX_LINUX_HOST_H_ */
+#endif /* _AIC7XXX_HOST_H_ */
