@@ -59,7 +59,7 @@
 #include "usb-uhci.h"
 #include "usb-uhci-debug.h"
 
-#include "hcd.h"
+#include "../hcd.h"
 
 /*
  * Version Information
